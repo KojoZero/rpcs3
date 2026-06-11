@@ -13,6 +13,7 @@
 
 #include "glutils/ring_buffer.h"
 #include "upscalers/upscaling.h"
+#include "antialiasing/antialiasing.h"
 
 #ifdef _MSC_VER
 #pragma comment(lib, "opengl32.lib")
@@ -140,8 +141,9 @@ class GLGSRender : public GSRender, public ::rsx::reports::ZCULL_control
 	gl::fbo m_sshot_fbo;
 	std::unique_ptr<gl::texture> m_sshot_tex;
 	std::unique_ptr<gl::upscaler> m_upscaler;
+	std::unique_ptr<gl::antialiasing_filter> m_antialiasing_filter;
 	output_scaling_mode m_output_scaling = output_scaling_mode::bilinear;
-
+	post_antialiasing_mode m_post_antialiasing = post_antialiasing_mode::none;
 	// VAOs are mandatory for core profile
 	gl::vao m_vao;
 

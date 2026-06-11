@@ -576,6 +576,9 @@ settings_dialog::settings_dialog(std::shared_ptr<gui_settings> gui_settings, std
 	});
 	SubscribeTooltip(ui->gbZCULL, tooltips.settings.zcull_operation_mode);
 
+	m_emu_settings->EnhanceComboBox(ui->postProcessAntiAliasing, emu_settings_type::PostAntialiasingMode);
+	SubscribeTooltip(ui->postProcessAntiAliasing, tooltips.settings.post_antialiasing_mode);
+
 	m_emu_settings->EnhanceComboBox(ui->outputScalingMode, emu_settings_type::OutputScalingMode);
 	SubscribeTooltip(ui->outputScalingMode, tooltips.settings.output_scaling_mode);
 

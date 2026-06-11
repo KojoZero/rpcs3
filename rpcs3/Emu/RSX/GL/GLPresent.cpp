@@ -395,6 +395,25 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 		const bool use_full_rgb_range_output = g_cfg.video.full_rgb_range_output.get();
 		const bool backbuffer_has_alpha = m_frame->has_alpha();
 
+		if (!m_antialiasing_filter || m_post_antialiasing != g_cfg.video.post_antialiasing)
+		{
+			m_post_antialiasing = g_cfg.video.post_antialiasing;
+
+			switch (m_post_antialiasing)
+			{
+			case post_antialiasing_mode::none:
+				//m_upscaler = std::make_unique<gl::nearest_upscale_pass>();
+				break;
+			case post_antialiasing_mode::fxaa:
+				//m_upscaler = std::make_unique<gl::fsr_upscale_pass>();
+				break;
+			case post_antialiasing_mode::smaa:
+			default:
+				//m_upscaler = std::make_unique<gl::bilinear_upscale_pass>();
+				break;
+			}
+		}
+
 		if (!m_upscaler || m_output_scaling != g_cfg.video.output_scaling)
 		{
 			m_output_scaling = g_cfg.video.output_scaling;

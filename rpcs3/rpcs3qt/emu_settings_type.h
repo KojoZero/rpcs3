@@ -107,6 +107,7 @@ enum class emu_settings_type
 	AllowHostGPULabels,
 	DisableMSLFastMath,
 	OutputScalingMode,
+	PostAntialiasingMode,
 	ForceHwMSAAResolve,
 	DisableAsyncHostMM,
 	UseReBAR,

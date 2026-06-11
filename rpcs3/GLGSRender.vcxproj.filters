@@ -125,6 +125,9 @@
     <ClInclude Include="Emu\RSX\GL\glutils\barriers.h">
       <Filter>glutils</Filter>
     </ClInclude>
+    <ClInclude Include="Emu\RSX\GL\antialiasing\antialiasing.h">
+      <Filter>antialiasing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="glutils">
@@ -135,6 +138,15 @@
     </Filter>
     <Filter Include="upscalers\fsr1">
       <UniqueIdentifier>{d5626eff-1471-4810-9e57-0f8987f86d67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="antialiasing">
+      <UniqueIdentifier>{e69d7be0-0872-42fc-a66c-accaf53b99ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="antialiasing\smaa">
+      <UniqueIdentifier>{3fb8d759-9a1b-4a11-b6a1-51bd0a3d0740}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="antialiasing\fxaa">
+      <UniqueIdentifier>{7c16c6d4-68f3-43bc-a6f8-985fe1c9b2f0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

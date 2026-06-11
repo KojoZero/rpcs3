@@ -705,6 +705,22 @@ void fmt_class_string<output_scaling_mode>::format(std::string& out, u64 arg)
 }
 
 template <>
+void fmt_class_string<post_antialiasing_mode>::format(std::string& out, u64 arg)
+{
+	format_enum(out, arg, [](post_antialiasing_mode value)
+		{
+			switch (value)
+			{
+			case post_antialiasing_mode::none: return "None";
+			case post_antialiasing_mode::fxaa: return "FXAA";
+			case post_antialiasing_mode::smaa: return "SMAA";
+			}
+
+			return unknown;
+		});
+}
+
+template <>
 void fmt_class_string<xfloat_accuracy>::format(std::string& out, u64 arg)
 {
 	format_enum(out, arg, [](xfloat_accuracy value)

@@ -43,8 +43,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>821</width>
-        <height>716</height>
+        <width>824</width>
+        <height>972</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -54,7 +54,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="coreTab">
        <attribute name="title">
@@ -760,6 +760,18 @@
                     </widget>
                    </item>
                   </layout>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="gb_postProcessAntiAliasing">
+                <property name="title">
+                 <string>Anti-Aliasing (Post-Process)</string>
+                </property>
+                <layout class="QVBoxLayout" name="gb_Upscaling_layout_2">
+                 <item>
+                  <widget class="QComboBox" name="postProcessAntiAliasing"/>
                  </item>
                 </layout>
                </widget>
@@ -2235,7 +2247,7 @@
             <property name="title">
              <string>Network Configuration</string>
             </property>
-            <layout class="QVBoxLayout" name="gb_network_status_layout" stretch="0,0,0,0,0,0">
+            <layout class="QVBoxLayout" name="gb_network_status_layout" stretch="0,0,0,0,0,0,0">
              <item>
               <widget class="QGroupBox" name="gb_netStatusBox">
                <property name="title">
@@ -4642,7 +4654,7 @@
           </item>
           <item>
            <widget class="QWidget" name="debug_more_stuff" native="true">
-            <layout class="QVBoxLayout" name="debug_more_stuff_layout" stretch="0,0,0,0,0,0,1">
+            <layout class="QVBoxLayout" name="debug_more_stuff_layout" stretch="0,0,0,0,0,0,1,0">
              <property name="leftMargin">
               <number>0</number>
              </property>

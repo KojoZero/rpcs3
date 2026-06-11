@@ -349,6 +349,13 @@ enum class output_scaling_mode
 	fsr
 };
 
+enum class post_antialiasing_mode
+{
+	none,
+	fxaa,
+	smaa
+};
+
 enum class stereo_render_mode_options
 {
 	disabled,

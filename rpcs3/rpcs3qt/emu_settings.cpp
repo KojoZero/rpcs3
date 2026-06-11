@@ -1112,6 +1112,14 @@ QString emu_settings::GetLocalizedSetting(const QString& original, emu_settings_
 		case gpu_preset_level::low: return tr("Low", "Shader Precision");
 		}
 		break;
+	case emu_settings_type::PostAntialiasingMode:
+		switch (static_cast<post_antialiasing_mode>(index))
+		{
+		case post_antialiasing_mode::none: return tr("None", "Post Antialiasing Mode");
+		case post_antialiasing_mode::fxaa: return tr("FXAA", "Post Antialiasing Mode");
+		case post_antialiasing_mode::smaa: return tr("SMAA", "Post Antialiasing Mode");
+		}
+		break;
 	case emu_settings_type::OutputScalingMode:
 		switch (static_cast<output_scaling_mode>(index))
 		{
