@@ -198,6 +198,7 @@ namespace gl
 		bool check() const;
 
 		void recreate();
+		void attach_texture(texture dst_texture);
 		void draw_buffer(const attachment& buffer) const;
 		void draw_buffer(swapchain_buffer buffer) const;
 		void draw_buffers(const std::initializer_list<attachment>& indexes) const;

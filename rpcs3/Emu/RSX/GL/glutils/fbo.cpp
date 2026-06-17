@@ -4,6 +4,7 @@
 #include "vao.hpp"
 
 #include "Emu/RSX/Common/simple_array.hpp"
+#include "Emu/RSX/GL/OpenGL.h"
 
 namespace gl
 {
@@ -67,6 +68,10 @@ namespace gl
 			remove();
 
 		create();
+	}
+
+	void fbo::attach_texture(gl::texture texture) {
+		glNamedFramebufferTexture(m_id, GL_COLOR_ATTACHMENT0, texture.id(), 0);
 	}
 
 	void fbo::draw_buffer(const attachment& buffer) const

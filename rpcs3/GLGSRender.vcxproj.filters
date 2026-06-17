@@ -49,6 +49,12 @@
     </ClCompile>
     <ClCompile Include="Emu\RSX\GL\GLDMA.cpp" />
     <ClCompile Include="Emu\RSX\GL\GLResolveHelper.cpp" />
+    <ClCompile Include="Emu\RSX\GL\antialiasing\fxaa\fxaa_pass.cpp">
+      <Filter>antialiasing\fxaa</Filter>
+    </ClCompile>
+    <ClCompile Include="Emu\RSX\GL\antialiasing\fxaa\smaa_pass.cpp">
+      <Filter>antialiasing\smaa</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Emu\RSX\GL\GLTexture.h" />
@@ -128,6 +134,24 @@
     <ClInclude Include="Emu\RSX\GL\antialiasing\antialiasing.h">
       <Filter>antialiasing</Filter>
     </ClInclude>
+    <ClInclude Include="Emu\RSX\GL\antialiasing\smaa\smaa_shader.h">
+      <Filter>antialiasing\smaa</Filter>
+    </ClInclude>
+    <ClInclude Include="Emu\RSX\GL\antialiasing\smaa\textures\AreaTex.h">
+      <Filter>antialiasing\smaa\textures</Filter>
+    </ClInclude>
+    <ClInclude Include="Emu\RSX\GL\antialiasing\smaa\textures\SearchTex.h">
+      <Filter>antialiasing\smaa\textures</Filter>
+    </ClInclude>
+    <ClInclude Include="Emu\RSX\GL\antialiasing\fxaa\fxaa_shader.h">
+      <Filter>antialiasing\fxaa</Filter>
+    </ClInclude>
+    <ClInclude Include="Emu\RSX\GL\antialiasing\fxaa\fxaa_pass.h">
+      <Filter>antialiasing\fxaa</Filter>
+    </ClInclude>
+    <ClInclude Include="Emu\RSX\GL\antialiasing\fxaa\smaa_pass.h">
+      <Filter>antialiasing\smaa</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="glutils">
@@ -147,6 +171,9 @@
     </Filter>
     <Filter Include="antialiasing\fxaa">
       <UniqueIdentifier>{7c16c6d4-68f3-43bc-a6f8-985fe1c9b2f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="antialiasing\smaa\textures">
+      <UniqueIdentifier>{c87ebaa5-4ca8-4f20-8708-c83bb5db7598}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
