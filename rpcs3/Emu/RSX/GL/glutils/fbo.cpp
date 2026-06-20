@@ -70,10 +70,6 @@ namespace gl
 		create();
 	}
 
-	void fbo::attach_texture(texture* dst_texture) {
-		glNamedFramebufferTexture(m_id, GL_COLOR_ATTACHMENT0, dst_texture->id(), 0);
-	}
-
 	void fbo::draw_buffer(const attachment& buffer) const
 	{
 		GLenum buf = buffer.id();

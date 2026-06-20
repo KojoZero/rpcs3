@@ -5,6 +5,9 @@
 #include "upscalers/fsr_pass.h"
 #include "upscalers/nearest_pass.hpp"
 
+#include "antialiasing/fxaa/fxaa_pass.h"
+//#include "antialiasing/smaa/smaa_pass.h"
+
 #include "Emu/Cell/Modules/cellVideoOut.h"
 #include "Emu/RSX/Overlays/overlay_manager.h"
 #include "Emu/RSX/Overlays/overlay_debug_overlay.h"
@@ -394,22 +397,24 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 		const areai screen_area = coordi({}, { static_cast<int>(buffer_width), static_cast<int>(buffer_height) });
 		const bool use_full_rgb_range_output = g_cfg.video.full_rgb_range_output.get();
 		const bool backbuffer_has_alpha = m_frame->has_alpha();
-
+		bool postAntialiasingEnabled;
 		if (!m_antialiasing_filter || m_post_antialiasing != g_cfg.video.post_antialiasing)
 		{
 			m_post_antialiasing = g_cfg.video.post_antialiasing;
 
 			switch (m_post_antialiasing)
 			{
-			case post_antialiasing_mode::none:
-				//m_upscaler = std::make_unique<gl::nearest_upscale_pass>();
-				break;
 			case post_antialiasing_mode::fxaa:
-				//m_upscaler = std::make_unique<gl::fsr_upscale_pass>();
+				m_antialiasing_filter = std::make_unique<gl::fxaa_pass>();
+				postAntialiasingEnabled = true;
 				break;
-			case post_antialiasing_mode::smaa:
+			//case post_antialiasing_mode::smaa:
+			//	m_antialiasing_filter = std::make_unique<gl::smaa_pass>();
+			//	postAntialiasingEnabled = true;
+			//	break;
 			default:
-				//m_upscaler = std::make_unique<gl::bilinear_upscale_pass>();
+				// m_upscaler = std::make_unique<gl::bilinear_upscale_pass>();
+				postAntialiasingEnabled = false;
 				break;
 			}
 		}
@@ -436,21 +441,44 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 		if (!backbuffer_has_alpha && use_full_rgb_range_output && rsx::fcmp(avconfig.gamma, 1.f) && !avconfig.stereo_enabled)
 		{
 			// Blit source image to the screen
-			m_upscaler->scale_output(cmd, image_to_flip, screen_area, aspect_ratio.flipped_vertical(), UPSCALE_AND_COMMIT | UPSCALE_DEFAULT_VIEW);
+			gl::texture* image_to_scale;
+			if (postAntialiasingEnabled)
+			{
+				image_to_scale = m_antialiasing_filter->antialias_output(cmd, image_to_flip, screen_area);
+				rsx_log.warning("RAN FXAA ANTIALIAS. SCALING ANTIALIASED OUTPUT");
+			}
+			else
+			{
+				image_to_scale = image_to_flip;
+			}
+			m_upscaler->scale_output(cmd, image_to_scale, screen_area, aspect_ratio.flipped_vertical(), UPSCALE_AND_COMMIT | UPSCALE_DEFAULT_VIEW);
 		}
 		else
 		{
 			const f32 gamma = avconfig.gamma;
 			const bool limited_range = !use_full_rgb_range_output;
 			const auto filter = m_output_scaling == output_scaling_mode::nearest ? gl::filter::nearest : gl::filter::linear;
-			rsx::simple_array<gl::texture*> images{ image_to_flip, image_to_flip2 };
+			gl::texture* image_to_scale;
+			gl::texture* image_to_scale2;
+			if (postAntialiasingEnabled)
+			{
+				image_to_scale = m_antialiasing_filter->antialias_output(cmd, image_to_flip, screen_area);
+				image_to_scale2 = m_antialiasing_filter->antialias_output(cmd, image_to_flip2, screen_area);
+			}
+			else
+			{
+				image_to_scale = image_to_flip;
+				image_to_scale2 = image_to_flip2;
+			}
+
+			rsx::simple_array<gl::texture*> images{image_to_scale, image_to_scale2};
 
 			if (m_output_scaling == output_scaling_mode::fsr && !avconfig.stereo_enabled) // 3D will be implemented later
 			{
 				for (unsigned i = 0; i < 2 && images[i]; ++i)
 				{
 					const rsx::flags32_t mode = (i == 0) ? UPSCALE_LEFT_VIEW : UPSCALE_RIGHT_VIEW;
-					images[i] = m_upscaler->scale_output(cmd, image_to_flip, screen_area, aspect_ratio.flipped_vertical(), mode);
+					images[i] = m_upscaler->scale_output(cmd, image_to_scale, screen_area, aspect_ratio.flipped_vertical(), mode);
 				}
 			}
 

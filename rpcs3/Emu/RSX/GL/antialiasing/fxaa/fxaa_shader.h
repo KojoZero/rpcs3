@@ -1,7 +1,7 @@
 #pragma once
 
 const char* FXAA_VERT = R"(
-version 330
+#version 430
 layout(location = 0) in vec2 vert_position;
 layout(location = 1) in vec2 vert_tex_coord;
 layout(location = 0) out vec2 frag_tex_coord;
@@ -66,11 +66,11 @@ FXAA_SUBPIX_CAP - Insures fine detail is not completely removed.
                   7.0/8.0 - high amount of filtering
                   1.0 - no capping of sub-pixel aliasing removal
 */
-version 330
+#version 430
 
 layout(location = 0) in vec2 frag_tex_coord;
 layout(location = 0) out vec4 color;
-layout(binding = 0) uniform sampler2D color_texture;
+layout(binding = 31) uniform sampler2D color_texture;
 
 uniform vec4 i_resolution;
 uniform int convert_colors;
@@ -270,7 +270,8 @@ void main()
     if (convert_colors == 1){
         pixel = vec4(sRGBToLinear(pixel.rgb), pixel.a);
     }
-    color = pixel;
+	color = pixel;
+    color = vec4(1.0,0.0,1.0,1.0);
 }
 
 )";

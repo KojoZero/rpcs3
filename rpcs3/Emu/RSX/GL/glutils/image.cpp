@@ -177,6 +177,12 @@ namespace gl
 				m_pitch = utils::align(width, 4);
 				break;
 			}
+			case GL_RGBA16F:
+			{
+				m_compressed = false;
+				m_pitch = width * 8;
+				break;
+			}
 			default:
 			{
 				GLenum query_target = (target == GL_TEXTURE_CUBE_MAP) ? GL_TEXTURE_CUBE_MAP_POSITIVE_X : target;
