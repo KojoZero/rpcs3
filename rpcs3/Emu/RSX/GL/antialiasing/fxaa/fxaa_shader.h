@@ -271,7 +271,9 @@ void main()
         pixel = vec4(sRGBToLinear(pixel.rgb), pixel.a);
     }
 	color = pixel;
-    color = vec4(1.0,0.0,1.0,1.0);
+
+	// Debug
+    // color = vec4(0.5,0.0,0.5,1.0);
 }
 
 )";

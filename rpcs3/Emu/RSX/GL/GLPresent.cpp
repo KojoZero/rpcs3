@@ -211,7 +211,8 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 
 	gl::texture* image_to_flip = nullptr;
 	gl::texture* image_to_flip2 = nullptr;
-
+	gl::texture* image_to_scale = nullptr;
+	gl::texture* image_to_scale2 = nullptr;
 	if (info.buffer < display_buffers_count && buffer_width && buffer_height)
 	{
 		// Find the source image
@@ -397,7 +398,6 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 		const areai screen_area = coordi({}, { static_cast<int>(buffer_width), static_cast<int>(buffer_height) });
 		const bool use_full_rgb_range_output = g_cfg.video.full_rgb_range_output.get();
 		const bool backbuffer_has_alpha = m_frame->has_alpha();
-		bool postAntialiasingEnabled;
 		if (!m_antialiasing_filter || m_post_antialiasing != g_cfg.video.post_antialiasing)
 		{
 			m_post_antialiasing = g_cfg.video.post_antialiasing;
@@ -440,16 +440,16 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 
 		if (!backbuffer_has_alpha && use_full_rgb_range_output && rsx::fcmp(avconfig.gamma, 1.f) && !avconfig.stereo_enabled)
 		{
-			// Blit source image to the screen
-			gl::texture* image_to_scale;
+			
 			if (postAntialiasingEnabled)
 			{
 				image_to_scale = m_antialiasing_filter->antialias_output(cmd, image_to_flip, screen_area);
-				rsx_log.warning("RAN FXAA ANTIALIAS. SCALING ANTIALIASED OUTPUT");
+				rsx_log.warning("postAntialiasingEnabled: TRUE");
 			}
 			else
 			{
 				image_to_scale = image_to_flip;
+				rsx_log.warning("postAntialiasingEnabled: FALSE");
 			}
 			m_upscaler->scale_output(cmd, image_to_scale, screen_area, aspect_ratio.flipped_vertical(), UPSCALE_AND_COMMIT | UPSCALE_DEFAULT_VIEW);
 		}
@@ -458,8 +458,6 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 			const f32 gamma = avconfig.gamma;
 			const bool limited_range = !use_full_rgb_range_output;
 			const auto filter = m_output_scaling == output_scaling_mode::nearest ? gl::filter::nearest : gl::filter::linear;
-			gl::texture* image_to_scale;
-			gl::texture* image_to_scale2;
 			if (postAntialiasingEnabled)
 			{
 				image_to_scale = m_antialiasing_filter->antialias_output(cmd, image_to_flip, screen_area);

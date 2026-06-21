@@ -48,6 +48,7 @@ namespace gl
 		m_program.remove();
 		m_fbo.remove();
 		m_sampler.remove();
+		m_intermediate_texture.reset();
 		// Textures auto destroyed upon deconestruction
 	}
 
@@ -62,16 +63,16 @@ namespace gl
 	}
 
 	gl::texture* fxaa_pass::antialias_output(gl::command_context& cmd, gl::texture* src, const areai& src_region) {
-		// Core Loop
-		// REALLOCATE TEXTURE IF SIZE CHANGED !!!!
+		// TODO: Implement Texture Reallocation on Resolution Scale Change (or if resolution higher than preallocated texture)
 
-		// Bind everything again
+		// Bind Framebuffer and VAO
 		m_vao.bind();
 		m_fbo.bind();
 
 
-		// Start Scaling
+		// Start Antialiasing
 		m_fbo.color = m_intermediate_texture->id();
+		m_fbo.read_buffer(m_fbo.color);
 		m_fbo.draw_buffer(m_fbo.color);
 		glViewport(0, 0, src_region.width(), src_region.height());
 		cmd->clear_color(color4f(0,0,0,1));
