@@ -6,7 +6,7 @@
 #include "upscalers/nearest_pass.hpp"
 
 #include "antialiasing/fxaa/fxaa_pass.h"
-//#include "antialiasing/smaa/smaa_pass.h"
+#include "antialiasing/smaa/smaa_pass.h"
 
 #include "Emu/Cell/Modules/cellVideoOut.h"
 #include "Emu/RSX/Overlays/overlay_manager.h"
@@ -408,12 +408,11 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 				m_antialiasing_filter = std::make_unique<gl::fxaa_pass>();
 				postAntialiasingEnabled = true;
 				break;
-			//case post_antialiasing_mode::smaa:
-			//	m_antialiasing_filter = std::make_unique<gl::smaa_pass>();
-			//	postAntialiasingEnabled = true;
-			//	break;
+			case post_antialiasing_mode::smaa:
+				m_antialiasing_filter = std::make_unique<gl::smaa_pass>();
+				postAntialiasingEnabled = true;
+				break;
 			default:
-				// m_upscaler = std::make_unique<gl::bilinear_upscale_pass>();
 				postAntialiasingEnabled = false;
 				break;
 			}
@@ -444,12 +443,10 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 			if (postAntialiasingEnabled)
 			{
 				image_to_scale = m_antialiasing_filter->antialias_output(cmd, image_to_flip, screen_area);
-				rsx_log.warning("postAntialiasingEnabled: TRUE");
 			}
 			else
 			{
 				image_to_scale = image_to_flip;
-				rsx_log.warning("postAntialiasingEnabled: FALSE");
 			}
 			m_upscaler->scale_output(cmd, image_to_scale, screen_area, aspect_ratio.flipped_vertical(), UPSCALE_AND_COMMIT | UPSCALE_DEFAULT_VIEW);
 		}

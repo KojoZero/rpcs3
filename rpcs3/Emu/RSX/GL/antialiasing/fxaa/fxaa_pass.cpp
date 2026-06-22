@@ -35,7 +35,7 @@ namespace gl
 			ScreenRectVertex(1.f, -1.f, 1.f, 0.f),  // Right, Bottom
 		};
 		rsx_log.warning("Created FBO/Sampler");
-		allocateTexture(1280, 720);
+		allocateTextures(1280, 720);
 		rsx_log.warning("Allocated Textures");
 	}
 
@@ -57,7 +57,7 @@ namespace gl
 		uniform_locs.convert_colors = glGetUniformLocation(shader_program_id, "convert_colors");
 	}
 
-	void fxaa_pass::allocateTexture(int width, int height) {
+	void fxaa_pass::allocateTextures(int width, int height) {
 		m_intermediate_texture.reset();
 		m_intermediate_texture = std::make_unique<gl::viewable_image>(GL_TEXTURE_2D, width, height, 1, 1, 1, GL_RGBA16F, RSX_FORMAT_CLASS_COLOR);
 	}

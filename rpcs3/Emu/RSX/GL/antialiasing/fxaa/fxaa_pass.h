@@ -46,7 +46,7 @@ namespace gl
 		gl::glsl::program m_program;
 		uniform_locations uniform_locs;
 		void attachUniforms(GLuint shader_program_id);
-		void allocateTexture(int width, int height);
+		void allocateTextures(int width, int height);
 		std::array<ScreenRectVertex, 4> m_vertices;
 	};
 } // namespace gl

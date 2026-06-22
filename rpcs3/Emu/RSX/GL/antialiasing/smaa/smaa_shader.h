@@ -1,7 +1,49 @@
 #pragma once
 
+const char* CONVERT_COLORS_VERT = R"(
+#version 430 core
+layout(location = 0) in vec2 vert_position;
+layout(location = 1) in vec2 vert_tex_coord;
+layout(location = 0) out vec2 frag_tex_coord;
+
+void main() {
+    gl_Position = vec4(vert_position, 0.0, 1.0);
+    frag_tex_coord = vert_tex_coord;
+}
+)";
+
+const char* CONVERT_COLORS_FRAG = R"(
+#version 430 core
+
+layout(location = 0) in vec2 frag_tex_coord;
+layout(location = 0) out vec4 color;
+layout(binding = 31) uniform sampler2D color_texture;
+uniform int convert_colors;
+
+vec3 sRGBToLinear(vec3 c) {
+    return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c));
+}
+
+vec3 LinearTosRGB(vec3 c) {
+    return mix(c * 12.92, 1.055 * pow(c, vec3(1.0/2.4)) - 0.055, step(0.0031308, c));
+}
+
+void main() {
+    vec4 pixel = texture(color_texture, frag_tex_coord);
+    if (convert_colors == 2){
+        pixel = vec4(LinearTosRGB(pixel.rgb), pixel.a);
+    } else if (convert_colors == 1){
+        pixel = vec4(sRGBToLinear(pixel.rgb), pixel.a);
+    }
+    color = pixel;
+}
+
+)";
+
+
+
 const char* SMAA_PASS_0_VERT = R"(
-version 330
+#version 430
 // SPDX-License-Identifier: Unlicense
 //-----------------------------------------------------------------------------
 // Edge Detection Shaders (First Pass)
@@ -29,7 +71,7 @@ void main() {
 )";
 
 const char* SMAA_PASS_0_FRAG = R"(
-version 330
+#version 430
 // SPDX-License-Identifier: Unlicense
 //-----------------------------------------------------------------------------
 // Edge Detection Shaders (First Pass)
@@ -44,7 +86,7 @@ uniform vec4 i_resolution;
 layout(location = 0) in vec2 frag_tex_coord;
 layout(location = 1) in vec4 offset[3];
 layout(location = 0) out vec4 color;
-layout(binding = 0) uniform sampler2D color_texture;
+layout(binding = 31) uniform sampler2D color_texture;
 
 #define SMAA_INCLUDE_VS 0
 #include "SMAA.hlsl"
@@ -60,7 +102,7 @@ void main() {
 )";
 
 const char* SMAA_PASS_1_VERT = R"(
-version 330
+#version 430
 // SPDX-License-Identifier: Unlicense
 //-----------------------------------------------------------------------------
 // Blending Weight Calculation Shader (Second Pass)
@@ -89,7 +131,7 @@ void main() {
 )";
 
 const char* SMAA_PASS_1_FRAG = R"(
-version 330
+#version 430
 // SPDX-License-Identifier: Unlicense
 //-----------------------------------------------------------------------------
 // Blending Weight Calculation Shader (Second Pass)
@@ -105,9 +147,9 @@ layout(location = 0) in vec2 frag_tex_coord;
 layout(location = 1) in vec2 pixcoord;
 layout(location = 2) in vec4 offset[3];
 layout(location = 0) out vec4 color;
-layout(binding = 0) uniform sampler2D color_texture;
-uniform sampler2D areaTex;
-uniform sampler2D searchTex;
+layout(binding = 31) uniform sampler2D color_texture;
+layout(binding = 30) uniform sampler2D areaTex;
+layout(binding = 29) uniform sampler2D searchTex;
 
 #define SMAA_INCLUDE_VS 0
 #include "SMAA.hlsl"
@@ -120,7 +162,7 @@ void main() {
 )";
 
 const char* SMAA_PASS_2_VERT = R"(
-version 330
+#version 430
 // SPDX-License-Identifier: Unlicense
 //-----------------------------------------------------------------------------
 // Neighborhood Blending Shader (Third Pass)
@@ -146,7 +188,7 @@ void main() {
 )";
 
 const char* SMAA_PASS_2_FRAG = R"(
-version 330
+#version 430
 // SPDX-License-Identifier: Unlicense
 //-----------------------------------------------------------------------------
 // Neighborhood Blending Shader (Third Pass)
@@ -160,8 +202,8 @@ uniform int convert_colors;
 layout(location = 0) in vec2 frag_tex_coord;
 layout(location = 1) in vec4 offset;
 layout(location = 0) out vec4 color;
-layout(binding = 0) uniform sampler2D color_texture;
-uniform sampler2D SMAA_Input;
+layout(binding = 31) uniform sampler2D color_texture;
+layout(binding = 30) uniform sampler2D SMAA_Input;
 
 #define SMAA_INCLUDE_VS 0
 #include "SMAA.hlsl"
@@ -551,7 +593,8 @@ const char* SMAA_HLSL = R"(
 #ifndef SMAA_MAX_SEARCH_STEPS
 #define SMAA_MAX_SEARCH_STEPS 16
 #endif
-
+)"
+R"(
 /**
  * SMAA_MAX_SEARCH_STEPS_DIAG specifies the maximum steps performed in the
  * diagonal pattern searches, at each side of the pixel. In this case we jump
@@ -1001,7 +1044,8 @@ float2 SMAAColorEdgeDetectionPS(float2 texcoord,
     // Then discard if there is no edge:
     if (dot(edges, float2(1.0, 1.0)) == 0.0)
         discard;
-
+)"
+R"(
     // Calculate right and bottom deltas:
     float3 Cright = SMAASamplePoint(colorTex, offset[1].xy).rgb;
     t = abs(C - Cright);
@@ -1032,7 +1076,6 @@ float2 SMAAColorEdgeDetectionPS(float2 texcoord,
 
     return edges;
 }
-
 /**
  * Depth Edge Detection
  */
@@ -1371,7 +1414,8 @@ void SMAADetectVerticalCornerPattern(SMAATexture2D(edgesTex), inout float2 weigh
     weights *= saturate(factor);
     #endif
 }
-
+)"
+R"(
 //-----------------------------------------------------------------------------
 // Blending Weight Calculation Pixel Shader (Second Pass)
 

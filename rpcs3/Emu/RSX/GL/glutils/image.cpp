@@ -183,6 +183,18 @@ namespace gl
 				m_pitch = width * 8;
 				break;
 			}
+			case GL_RG8:
+			{
+				m_compressed = false;
+				m_pitch = width * 2;
+				break;
+			}
+			case GL_R8:
+			{
+				m_compressed = false;
+				m_pitch = width;
+				break;
+			}
 			default:
 			{
 				GLenum query_target = (target == GL_TEXTURE_CUBE_MAP) ? GL_TEXTURE_CUBE_MAP_POSITIVE_X : target;

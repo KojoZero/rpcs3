@@ -54,7 +54,7 @@
     <ClInclude Include="Emu\RSX\GL\antialiasing\antialiasing.h" />
     <ClInclude Include="Emu\RSX\GL\antialiasing\fxaa\fxaa_pass.h" />
     <ClInclude Include="Emu\RSX\GL\antialiasing\fxaa\fxaa_shader.h" />
-    <ClInclude Include="Emu\RSX\GL\antialiasing\fxaa\smaa_pass.h" />
+    <ClInclude Include="Emu\RSX\GL\antialiasing\smaa\smaa_pass.h" />
     <ClInclude Include="Emu\RSX\GL\antialiasing\smaa\smaa_shader.h" />
     <ClInclude Include="Emu\RSX\GL\antialiasing\smaa\textures\AreaTex.h" />
     <ClInclude Include="Emu\RSX\GL\antialiasing\smaa\textures\SearchTex.h" />
@@ -97,7 +97,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Emu\RSX\GL\antialiasing\fxaa\fxaa_pass.cpp" />
-    <ClCompile Include="Emu\RSX\GL\antialiasing\fxaa\smaa_pass.cpp" />
+    <ClCompile Include="Emu\RSX\GL\antialiasing\smaa\smaa_pass.cpp" />
     <ClCompile Include="Emu\RSX\GL\GLCommonDecompiler.cpp" />
     <ClCompile Include="Emu\RSX\GL\GLCompute.cpp" />
     <ClCompile Include="Emu\RSX\GL\GLDMA.cpp" />

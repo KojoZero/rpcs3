@@ -52,7 +52,7 @@
     <ClCompile Include="Emu\RSX\GL\antialiasing\fxaa\fxaa_pass.cpp">
       <Filter>antialiasing\fxaa</Filter>
     </ClCompile>
-    <ClCompile Include="Emu\RSX\GL\antialiasing\fxaa\smaa_pass.cpp">
+    <ClCompile Include="Emu\RSX\GL\antialiasing\smaa\smaa_pass.cpp">
       <Filter>antialiasing\smaa</Filter>
     </ClCompile>
   </ItemGroup>
@@ -149,7 +149,7 @@
     <ClInclude Include="Emu\RSX\GL\antialiasing\fxaa\fxaa_pass.h">
       <Filter>antialiasing\fxaa</Filter>
     </ClInclude>
-    <ClInclude Include="Emu\RSX\GL\antialiasing\fxaa\smaa_pass.h">
+    <ClInclude Include="Emu\RSX\GL\antialiasing\smaa\smaa_pass.h">
       <Filter>antialiasing\smaa</Filter>
     </ClInclude>
   </ItemGroup>
