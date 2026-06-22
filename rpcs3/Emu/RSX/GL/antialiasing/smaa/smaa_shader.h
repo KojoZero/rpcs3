@@ -35,6 +35,8 @@ void main() {
     } else if (convert_colors == 1){
         pixel = vec4(sRGBToLinear(pixel.rgb), pixel.a);
     }
+	// Remove Transparency 
+	pixel = vec4(pixel.rgb, 1.0);
     color = pixel;
 }
 
@@ -50,7 +52,7 @@ const char* SMAA_PASS_0_VERT = R"(
 
 uniform vec4 i_resolution;
 #define SMAA_RT_METRICS vec4(i_resolution.z, i_resolution.w, i_resolution.x, i_resolution.y)
-#define SMAA_GLSL_3
+#define SMAA_GLSL_4
 #define SMAA_FLIP_Y 0
 #define SMAA_PRESET_ULTRA
 #define SMAA_EDT 1.0
@@ -78,7 +80,7 @@ const char* SMAA_PASS_0_FRAG = R"(
 
 uniform vec4 i_resolution;
 #define SMAA_RT_METRICS vec4(i_resolution.z, i_resolution.w, i_resolution.x, i_resolution.y)
-#define SMAA_GLSL_3
+#define SMAA_GLSL_4
 #define SMAA_FLIP_Y 0
 #define SMAA_PRESET_ULTRA
 #define SMAA_EDT 1.0
@@ -109,7 +111,7 @@ const char* SMAA_PASS_1_VERT = R"(
 
 uniform vec4 i_resolution;
 #define SMAA_RT_METRICS vec4(i_resolution.z, i_resolution.w, i_resolution.x, i_resolution.y)
-#define SMAA_GLSL_3
+#define SMAA_GLSL_4
 #define SMAA_FLIP_Y 0
 #define SMAA_PRESET_ULTRA
 #define SMAA_EDT 1.0
@@ -138,7 +140,7 @@ const char* SMAA_PASS_1_FRAG = R"(
 
 uniform vec4 i_resolution;
 #define SMAA_RT_METRICS vec4(i_resolution.z, i_resolution.w, i_resolution.x, i_resolution.y)
-#define SMAA_GLSL_3
+#define SMAA_GLSL_4
 #define SMAA_FLIP_Y 0
 #define SMAA_PRESET_ULTRA
 #define SMAA_EDT 1.0
@@ -169,7 +171,7 @@ const char* SMAA_PASS_2_VERT = R"(
 
 uniform vec4 i_resolution;
 #define SMAA_RT_METRICS vec4(i_resolution.z, i_resolution.w, i_resolution.x, i_resolution.y)
-#define SMAA_GLSL_3
+#define SMAA_GLSL_4
 #define SMAA_FLIP_Y 0
 
 layout(location = 0) in vec2 vert_position;
@@ -196,7 +198,7 @@ const char* SMAA_PASS_2_FRAG = R"(
 uniform vec4 i_resolution;
 uniform int convert_colors;
 #define SMAA_RT_METRICS vec4(i_resolution.z, i_resolution.w, i_resolution.x, i_resolution.y)
-#define SMAA_GLSL_3
+#define SMAA_GLSL_4
 #define SMAA_FLIP_Y 0
 
 layout(location = 0) in vec2 frag_tex_coord;

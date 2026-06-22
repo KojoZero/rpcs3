@@ -9,13 +9,13 @@ namespace gl
 		m_vao.bind();
 		m_vbo.create();
 		m_vbo.bind();
-		rsx_log.warning("Created VAO/VBO");
+		printf("Created VAO/VBO\n");
 		glBufferData(GL_ARRAY_BUFFER, sizeof(ScreenRectVertex) * 4, nullptr, GL_STREAM_DRAW);
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenRectVertex), (void*)offsetof(ScreenRectVertex, position));
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenRectVertex), (void*)offsetof(ScreenRectVertex, tex_coord));
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
-		rsx_log.warning("Set Vertex Attribs");
+		printf("Set Vertex Attribs\n");
 		m_vert_shader.create(::glsl::program_domain::glsl_vertex_program, FXAA_VERT);
 		m_vert_shader.compile();
 		m_frag_shader.create(::glsl::program_domain::glsl_fragment_program, FXAA_FRAG);
@@ -24,7 +24,7 @@ namespace gl
 		m_program.attach(m_vert_shader);
 		m_program.attach(m_frag_shader);
 		m_program.link();
-		rsx_log.warning("Compiled Shader");
+		printf("Compiled Shader\n");
 		m_sampler.create();
 		m_sampler.apply_defaults(GL_LINEAR);
 		m_fbo.create();
@@ -34,9 +34,9 @@ namespace gl
 			ScreenRectVertex(-1.f, -1.f, 0.f, 0.f), // Left,  Bottom
 			ScreenRectVertex(1.f, -1.f, 1.f, 0.f),  // Right, Bottom
 		};
-		rsx_log.warning("Created FBO/Sampler");
+		printf("Created FBO/Sampler\n");
 		allocateTextures(1280, 720);
-		rsx_log.warning("Allocated Textures");
+		printf("Allocated Textures\n");
 	}
 
 

@@ -405,14 +405,25 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 			switch (m_post_antialiasing)
 			{
 			case post_antialiasing_mode::fxaa:
+				printf("Post Antialiasing Mode: FXAA SELECTED\n");
 				m_antialiasing_filter = std::make_unique<gl::fxaa_pass>();
+				printf("Post Antialiasing Mode: FXAA CREATED\n");
 				postAntialiasingEnabled = true;
 				break;
 			case post_antialiasing_mode::smaa:
+				printf("Post Antialiasing Mode: SMAA SELECTED\n");
 				m_antialiasing_filter = std::make_unique<gl::smaa_pass>();
+				printf("Post Antialiasing Mode: SMAA CREATED\n");
 				postAntialiasingEnabled = true;
 				break;
+			 //case post_antialiasing_mode::smaa:
+				////printf("Post Antialiasing Mode: SMAA SELECTED\n");
+				////m_antialiasing_filter = std::make_unique<gl::smaa_pass>();
+				////printf("Post Antialiasing Mode: SMAA CREATED\n");
+				//postAntialiasingEnabled = false;
+				//break;
 			default:
+				printf("Post Antialiasing Mode: NONE SELECTED\n");
 				postAntialiasingEnabled = false;
 				break;
 			}
@@ -443,6 +454,7 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 			if (postAntialiasingEnabled)
 			{
 				image_to_scale = m_antialiasing_filter->antialias_output(cmd, image_to_flip, screen_area);
+				/*printf("SUCCESSFULLY ANTIALIASED OUTPUT\n");*/
 			}
 			else
 			{

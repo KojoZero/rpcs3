@@ -44,16 +44,17 @@ namespace gl
 		std::array<gl::sampler_state, 2> m_sampler;
 		std::unique_ptr<gl::viewable_image> m_area_tex;
 		std::unique_ptr<gl::viewable_image> m_search_tex;
-		std::array<std::unique_ptr<gl::viewable_image>, 4> m_intermediate_texture;
+		std::array<std::unique_ptr<gl::viewable_image>, 5> m_intermediate_texture;
 		std::array<gl::glsl::shader, 4> m_vert_shader;
 		std::array<gl::glsl::shader, 4> m_frag_shader;
 		std::array<gl::glsl::program, 4>  m_program;
 		uniform_locations uniform_locs;
+		void reset_sampler_states();
 		void attachUniforms(GLuint shader_program_id);
 		void allocateTextures(int width, int height);
 		void allocateLookupTextures();
-		void replaceInclude(std::string& shader_source, std::string_view include_name,
-			std::string_view include_content);
+		void replaceInclude(std::string& shader_source, std::string include_name,
+			std::string include_content);
 		std::array<ScreenRectVertex, 4> m_vertices;
 	};
 } // namespace gl
