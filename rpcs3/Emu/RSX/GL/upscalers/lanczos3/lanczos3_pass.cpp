@@ -1,5 +1,3 @@
-#pragma once
-
 #include "lanczos3_pass.h"
 #include "lanczos3_shader.h"
 
@@ -13,8 +11,8 @@ namespace gl
 		m_vbo.bind();
 		printf("Created VAO/VBO\n");
 		glBufferData(GL_ARRAY_BUFFER, sizeof(ScreenRectVertex) * 4, nullptr, GL_STREAM_DRAW);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenRectVertex), (void*)offsetof(ScreenRectVertex, position));
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenRectVertex), (void*)offsetof(ScreenRectVertex, tex_coord));
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenRectVertex), reinterpret_cast<void*>(offsetof(ScreenRectVertex, position)));
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenRectVertex), reinterpret_cast<void*>(offsetof(ScreenRectVertex, tex_coord)));
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		printf("Set Vertex Attribs\n");

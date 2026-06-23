@@ -597,6 +597,9 @@ if(NOT ANDROID AND NOT APPLE)
         RSX/GL/GLVertexProgram.cpp
         RSX/GL/OpenGL.cpp
         RSX/GL/upscalers/fsr1/fsr_pass.cpp
+        RSX/GL/upscalers/lanczos3/lanczos3_pass.cpp
+        RSX/GL/antialiasing/fxaa/fxaa_pass.cpp
+        RSX/GL/antialiasing/smaa/smaa_pass.cpp
     )
 endif()
 
