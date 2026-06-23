@@ -2,6 +2,11 @@
 
 #include "../glutils/image.h"
 #include "../glutils/state_tracker.hpp"
+#include "../glutils/buffer_object.h"
+#include "../glutils/vao.hpp"
+#include "../glutils/fbo.h"
+#include "../glutils/sampler.h"
+#include "../glutils/program.h"
 
 namespace gl
 {

@@ -57,10 +57,5 @@ namespace gl
 			std::string include_content);
 		std::array<ScreenRectVertex, 4> m_vertices;
 
-		//Blend State Stuff
-		void save_blend_state();
-		void load_blend_state();
-		GLint srcRGB, dstRGB, srcAlpha, dstAlpha;
-
 	};
 } // namespace gl

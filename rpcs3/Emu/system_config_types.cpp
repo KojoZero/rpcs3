@@ -697,6 +697,7 @@ void fmt_class_string<output_scaling_mode>::format(std::string& out, u64 arg)
 		{
 		case output_scaling_mode::nearest: return "Nearest";
 		case output_scaling_mode::bilinear: return "Bilinear";
+		case output_scaling_mode::lanczos3: return "Lanczos3";
 		case output_scaling_mode::fsr: return "FidelityFX Super Resolution";
 		}
 

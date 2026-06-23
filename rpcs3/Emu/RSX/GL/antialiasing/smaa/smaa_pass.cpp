@@ -166,16 +166,6 @@ namespace gl
 		}
 	}
 
-	void smaa_pass::save_blend_state() {
-		glGetIntegerv(GL_BLEND_SRC_RGB, &srcRGB);
-		glGetIntegerv(GL_BLEND_DST_RGB, &dstRGB);
-		glGetIntegerv(GL_BLEND_SRC_ALPHA, &srcAlpha);
-		glGetIntegerv(GL_BLEND_DST_ALPHA, &dstAlpha);
-	}
-
-	void smaa_pass::load_blend_state() {
-		glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
-	}
 	gl::texture* smaa_pass::antialias_output(gl::command_context& cmd, gl::texture* src, const areai& src_region)
 	{
 		// TODO: Implement Texture Reallocation on Resolution Scale Change (or if resolution higher than preallocated texture)
@@ -259,7 +249,6 @@ namespace gl
 		reset_sampler_states();
 
 		glEnable(GL_BLEND);
-		//save_blend_state();
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// Create Neighborhood Blending Texture
@@ -282,7 +271,6 @@ namespace gl
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 		reset_sampler_states();
 
-		//load_blend_state();
 		glDisable(GL_BLEND);
 
 		return m_intermediate_texture[2].get();

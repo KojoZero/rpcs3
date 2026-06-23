@@ -55,6 +55,9 @@
     <ClCompile Include="Emu\RSX\GL\antialiasing\smaa\smaa_pass.cpp">
       <Filter>antialiasing\smaa</Filter>
     </ClCompile>
+    <ClCompile Include="Emu\RSX\GL\upscalers\lanczos3\lanczos3_pass.cpp">
+      <Filter>upscalers\lanczos3</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Emu\RSX\GL\GLTexture.h" />
@@ -152,6 +155,12 @@
     <ClInclude Include="Emu\RSX\GL\antialiasing\smaa\smaa_pass.h">
       <Filter>antialiasing\smaa</Filter>
     </ClInclude>
+    <ClInclude Include="Emu\RSX\GL\upscalers\lanczos3\lanczos3_shader.h">
+      <Filter>upscalers\lanczos3</Filter>
+    </ClInclude>
+    <ClInclude Include="Emu\RSX\GL\upscalers\lanczos3\lanczos3_pass.h">
+      <Filter>upscalers\lanczos3</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="glutils">
@@ -174,6 +183,9 @@
     </Filter>
     <Filter Include="antialiasing\smaa\textures">
       <UniqueIdentifier>{c87ebaa5-4ca8-4f20-8708-c83bb5db7598}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="upscalers\lanczos3">
+      <UniqueIdentifier>{5e0a6c14-67f5-4a09-ad69-d7b47f7901cb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
