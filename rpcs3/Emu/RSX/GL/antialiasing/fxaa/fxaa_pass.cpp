@@ -41,6 +41,7 @@ namespace gl
 
 
 	fxaa_pass::~fxaa_pass() {
+		printf("Destroying: FXAA PASS\n");
 		m_vao.remove();
 		m_vbo.remove();
 		m_vert_shader.remove();
@@ -49,7 +50,7 @@ namespace gl
 		m_fbo.remove();
 		m_sampler.remove();
 		m_intermediate_texture.reset();
-		// Textures auto destroyed upon deconestruction
+		printf("Destroyed: FXAA PASS\n");
 	}
 
 	void fxaa_pass::attachUniforms(GLuint shader_program_id) {
@@ -59,7 +60,7 @@ namespace gl
 
 	void fxaa_pass::allocateTextures(int width, int height) {
 		m_intermediate_texture.reset();
-		m_intermediate_texture = std::make_unique<gl::viewable_image>(GL_TEXTURE_2D, width, height, 1, 1, 1, GL_RGBA16F, RSX_FORMAT_CLASS_COLOR);
+		m_intermediate_texture = std::make_unique<gl::texture>(GL_TEXTURE_2D, width, height, 1, 1, 1, GL_RGBA16F, RSX_FORMAT_CLASS_COLOR);
 	}
 
 	gl::texture* fxaa_pass::antialias_output(gl::command_context& cmd, gl::texture* src, const areai& src_region) {
@@ -77,8 +78,8 @@ namespace gl
 		glViewport(0, 0, src_region.width(), src_region.height());
 		cmd->clear_color(color4f(0,0,0,1));
 		glClear(GL_COLOR_BUFFER_BIT);
-		saved_sampler_state saved(GL_TEMP_IMAGE_SLOT(0), m_sampler);
-		cmd->bind_texture(GL_TEMP_IMAGE_SLOT(0), GL_TEXTURE_2D, src->id());
+		saved_sampler_state saved(0, m_sampler);
+		cmd->bind_texture(0, GL_TEXTURE_2D, src->id());
 		cmd->use_program(m_program.id());
 		attachUniforms(m_program.id());
 		glUniform4f(uniform_locs.i_resolution, src_region.width(), src_region.height(), 1.0f / src_region.width(), 1.0f / src_region.height());

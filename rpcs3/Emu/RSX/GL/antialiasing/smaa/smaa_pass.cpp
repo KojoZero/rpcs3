@@ -75,6 +75,7 @@ namespace gl
 
 	smaa_pass::~smaa_pass()
 	{
+		printf("Destroying: SMAA PASS\n");
 		m_vao.remove();
 		m_vbo.remove();
 		for (size_t i = 0; i < m_vert_shader.size(); i++)
@@ -92,7 +93,7 @@ namespace gl
 		}
 		m_area_tex.reset();
 		m_search_tex.reset();
-		// Textures auto destroyed upon deconestruction
+		printf("Destroyed: SMAA PASS\n");
 	}
 
 	void smaa_pass::attachUniforms(GLuint shader_program_id)
@@ -106,7 +107,7 @@ namespace gl
 		for (size_t i = 0; i < m_intermediate_texture.size(); i++)
 		{
 			m_intermediate_texture[i].reset();
-			m_intermediate_texture[i] = std::make_unique<gl::viewable_image>(GL_TEXTURE_2D, width, height, 1, 1, 1, GL_RGBA16F, RSX_FORMAT_CLASS_COLOR);
+			m_intermediate_texture[i] = std::make_unique<gl::texture>(GL_TEXTURE_2D, width, height, 1, 1, 1, GL_RGBA16F, RSX_FORMAT_CLASS_COLOR);
 			printf("Allocated Intemediate Texture: %d...\n", static_cast<int>(i));
 		}
 	}
@@ -127,12 +128,12 @@ namespace gl
 
 	void smaa_pass::allocateLookupTextures()
 	{
-		m_area_tex = std::make_unique<gl::viewable_image>(GL_TEXTURE_2D, AREATEX_WIDTH, AREATEX_HEIGHT, 1, 1, 1, GL_RG8, RSX_FORMAT_CLASS_COLOR);
-		m_search_tex = std::make_unique<gl::viewable_image>(GL_TEXTURE_2D, SEARCHTEX_WIDTH, SEARCHTEX_HEIGHT, 1, 1, 1, GL_R8, RSX_FORMAT_CLASS_COLOR);
+		m_area_tex = std::make_unique<gl::texture>(GL_TEXTURE_2D, AREATEX_WIDTH, AREATEX_HEIGHT, 1, 1, 1, GL_RG8, RSX_FORMAT_CLASS_COLOR);
+		m_search_tex = std::make_unique<gl::texture>(GL_TEXTURE_2D, SEARCHTEX_WIDTH, SEARCHTEX_HEIGHT, 1, 1, 1, GL_R8, RSX_FORMAT_CLASS_COLOR);
 		std::vector<unsigned char> areaTexBytes_flipped = flipVertically(areaTexBytes, AREATEX_WIDTH, AREATEX_HEIGHT, 2);
 		std::vector<unsigned char> searchTexBytes_flipped = flipVertically(searchTexBytes, SEARCHTEX_WIDTH, SEARCHTEX_HEIGHT, 1);
 		printf("Initialized SMAA Textures\n");
-		glActiveTexture(GL_TEMP_IMAGE_SLOT(0));
+		glActiveTexture(0);
 		GLint originalAlignment;
 		glGetIntegerv(GL_UNPACK_ROW_LENGTH, &originalAlignment);
 		glBindTexture(GL_TEXTURE_2D, m_area_tex->id());
@@ -164,6 +165,17 @@ namespace gl
 			sampler_state.reset();
 		}
 	}
+
+	void smaa_pass::save_blend_state() {
+		glGetIntegerv(GL_BLEND_SRC_RGB, &srcRGB);
+		glGetIntegerv(GL_BLEND_DST_RGB, &dstRGB);
+		glGetIntegerv(GL_BLEND_SRC_ALPHA, &srcAlpha);
+		glGetIntegerv(GL_BLEND_DST_ALPHA, &dstAlpha);
+	}
+
+	void smaa_pass::load_blend_state() {
+		glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
+	}
 	gl::texture* smaa_pass::antialias_output(gl::command_context& cmd, gl::texture* src, const areai& src_region)
 	{
 		// TODO: Implement Texture Reallocation on Resolution Scale Change (or if resolution higher than preallocated texture)
@@ -180,8 +192,8 @@ namespace gl
 		glViewport(0, 0, src_region.width(), src_region.height());
 		cmd->clear_color(color4f(0, 0, 0, 0));
 		glClear(GL_COLOR_BUFFER_BIT);
-		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(GL_TEMP_IMAGE_SLOT(0), m_sampler[1]);
-		cmd->bind_texture(GL_TEMP_IMAGE_SLOT(0), GL_TEXTURE_2D, src->id());
+		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[1]);
+		cmd->bind_texture(0, GL_TEXTURE_2D, src->id());
 		cmd->use_program(m_program[3].id());
 		attachUniforms(m_program[3].id());
 		glUniform1i(uniform_locs.convert_colors, 0);
@@ -196,8 +208,8 @@ namespace gl
 		glViewport(0, 0, src_region.width(), src_region.height());
 		cmd->clear_color(color4f(0, 0, 0, 0));
 		glClear(GL_COLOR_BUFFER_BIT);
-		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(GL_TEMP_IMAGE_SLOT(0), m_sampler[1]);
-		cmd->bind_texture(GL_TEMP_IMAGE_SLOT(0), GL_TEXTURE_2D, src->id());
+		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[1]);
+		cmd->bind_texture(0, GL_TEXTURE_2D, src->id());
 		cmd->use_program(m_program[3].id());
 		attachUniforms(m_program[3].id());
 		glUniform1i(uniform_locs.convert_colors, 1);
@@ -215,8 +227,8 @@ namespace gl
 		glViewport(0, 0, src_region.width(), src_region.height());
 		cmd->clear_color(color4f(0, 0, 0, 0));
 		glClear(GL_COLOR_BUFFER_BIT);
-		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(GL_TEMP_IMAGE_SLOT(0), m_sampler[1]);
-		cmd->bind_texture(GL_TEMP_IMAGE_SLOT(0), GL_TEXTURE_2D, m_intermediate_texture[4]->id());
+		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[1]);
+		cmd->bind_texture(0, GL_TEXTURE_2D, m_intermediate_texture[4]->id());
 		cmd->use_program(m_program[0].id());
 		attachUniforms(m_program[0].id());
 		glUniform4f(uniform_locs.i_resolution, src_region.width(), src_region.height(), 1.0f / src_region.width(), 1.0f / src_region.height());
@@ -232,12 +244,12 @@ namespace gl
 		glViewport(0, 0, src_region.width(), src_region.height());
 		cmd->clear_color(color4f(0, 0, 0, 0));
 		glClear(GL_COLOR_BUFFER_BIT);
-		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(GL_TEMP_IMAGE_SLOT(0), m_sampler[1]);
-		cmd->bind_texture(GL_TEMP_IMAGE_SLOT(0), GL_TEXTURE_2D, m_intermediate_texture[0]->id());
-		saved_sampler_states[1] = std::make_unique<saved_sampler_state>(GL_TEMP_IMAGE_SLOT(1), m_sampler[1]);
-		cmd->bind_texture(GL_TEMP_IMAGE_SLOT(1), GL_TEXTURE_2D, m_area_tex->id());
-		saved_sampler_states[2] = std::make_unique<saved_sampler_state>(GL_TEMP_IMAGE_SLOT(2), m_sampler[1]);
-		cmd->bind_texture(GL_TEMP_IMAGE_SLOT(2), GL_TEXTURE_2D, m_search_tex->id());
+		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[1]);
+		cmd->bind_texture(0, GL_TEXTURE_2D, m_intermediate_texture[0]->id());
+		saved_sampler_states[1] = std::make_unique<saved_sampler_state>(1, m_sampler[1]);
+		cmd->bind_texture(1, GL_TEXTURE_2D, m_area_tex->id());
+		saved_sampler_states[2] = std::make_unique<saved_sampler_state>(2, m_sampler[1]);
+		cmd->bind_texture(2, GL_TEXTURE_2D, m_search_tex->id());
 		cmd->use_program(m_program[1].id());
 		attachUniforms(m_program[1].id());
 		glUniform4f(uniform_locs.i_resolution, src_region.width(), src_region.height(), 1.0f / src_region.width(), 1.0f / src_region.height());
@@ -247,6 +259,7 @@ namespace gl
 		reset_sampler_states();
 
 		glEnable(GL_BLEND);
+		//save_blend_state();
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// Create Neighborhood Blending Texture
@@ -256,10 +269,10 @@ namespace gl
 		glViewport(0, 0, src_region.width(), src_region.height());
 		cmd->clear_color(color4f(0, 0, 0, 1));
 		glClear(GL_COLOR_BUFFER_BIT);
-		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(GL_TEMP_IMAGE_SLOT(0), m_sampler[1]);
-		cmd->bind_texture(GL_TEMP_IMAGE_SLOT(0), GL_TEXTURE_2D, m_intermediate_texture[1]->id());
-		saved_sampler_states[1] = std::make_unique<saved_sampler_state>(GL_TEMP_IMAGE_SLOT(1), m_sampler[1]);
-		cmd->bind_texture(GL_TEMP_IMAGE_SLOT(1), GL_TEXTURE_2D, m_intermediate_texture[3]->id());
+		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[1]);
+		cmd->bind_texture(0, GL_TEXTURE_2D, m_intermediate_texture[1]->id());
+		saved_sampler_states[1] = std::make_unique<saved_sampler_state>(1, m_sampler[1]);
+		cmd->bind_texture(1, GL_TEXTURE_2D, m_intermediate_texture[3]->id());
 		cmd->use_program(m_program[2].id());
 		attachUniforms(m_program[2].id());
 		glUniform4f(uniform_locs.i_resolution, src_region.width(), src_region.height(), 1.0f / src_region.width(), 1.0f / src_region.height());
@@ -268,6 +281,10 @@ namespace gl
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 		reset_sampler_states();
+
+		//load_blend_state();
+		glDisable(GL_BLEND);
+
 		return m_intermediate_texture[2].get();
 	}
 } // namespace gl

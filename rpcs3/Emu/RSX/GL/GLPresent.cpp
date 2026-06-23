@@ -398,6 +398,8 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 		const areai screen_area = coordi({}, { static_cast<int>(buffer_width), static_cast<int>(buffer_height) });
 		const bool use_full_rgb_range_output = g_cfg.video.full_rgb_range_output.get();
 		const bool backbuffer_has_alpha = m_frame->has_alpha();
+
+
 		if (!m_antialiasing_filter || m_post_antialiasing != g_cfg.video.post_antialiasing)
 		{
 			m_post_antialiasing = g_cfg.video.post_antialiasing;
@@ -416,17 +418,21 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 				printf("Post Antialiasing Mode: SMAA CREATED\n");
 				postAntialiasingEnabled = true;
 				break;
-			 //case post_antialiasing_mode::smaa:
-				////printf("Post Antialiasing Mode: SMAA SELECTED\n");
-				////m_antialiasing_filter = std::make_unique<gl::smaa_pass>();
-				////printf("Post Antialiasing Mode: SMAA CREATED\n");
-				//postAntialiasingEnabled = false;
-				//break;
 			default:
 				printf("Post Antialiasing Mode: NONE SELECTED\n");
 				postAntialiasingEnabled = false;
 				break;
 			}
+		}
+
+		m_post_antialiasing = g_cfg.video.post_antialiasing;
+		if (m_post_antialiasing == post_antialiasing_mode::none)
+		{
+			postAntialiasingEnabled = false;
+		}
+		else
+		{
+			postAntialiasingEnabled = true;
 		}
 
 		if (!m_upscaler || m_output_scaling != g_cfg.video.output_scaling)
@@ -454,7 +460,6 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 			if (postAntialiasingEnabled)
 			{
 				image_to_scale = m_antialiasing_filter->antialias_output(cmd, image_to_flip, screen_area);
-				/*printf("SUCCESSFULLY ANTIALIASED OUTPUT\n");*/
 			}
 			else
 			{

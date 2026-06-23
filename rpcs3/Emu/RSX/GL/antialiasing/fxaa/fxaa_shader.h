@@ -70,7 +70,7 @@ FXAA_SUBPIX_CAP - Insures fine detail is not completely removed.
 
 layout(location = 0) in vec2 frag_tex_coord;
 layout(location = 0) out vec4 color;
-layout(binding = 31) uniform sampler2D color_texture;
+layout(binding = 0) uniform sampler2D color_texture;
 
 uniform vec4 i_resolution;
 uniform int convert_colors;

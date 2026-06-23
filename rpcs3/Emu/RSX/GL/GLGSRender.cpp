@@ -61,6 +61,8 @@ GLGSRender::GLGSRender(utils::serial* ar) noexcept : GSRender(ar)
 
 GLGSRender::~GLGSRender()
 {
+	m_antialiasing_filter.reset();
+	m_upscaler.reset();
 	if (m_frame)
 	{
 		m_frame->reset();

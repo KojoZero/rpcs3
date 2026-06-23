@@ -159,7 +159,9 @@ namespace gl
 
 	fsr_upscale_pass::~fsr_upscale_pass()
 	{
+		printf("Destroying: FSR PASS\n");
 		dispose_images();
+		printf("Destroyed: FSR PASS\n");
 	}
 
 	void fsr_upscale_pass::dispose_images()

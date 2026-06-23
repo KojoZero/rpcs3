@@ -13,10 +13,12 @@ namespace gl
 		static_upscale_pass() = default;
 		~static_upscale_pass()
 		{
+			printf("Destroying: Upscale Pass\n");
 			if (m_flip_fbo)
 			{
 				m_flip_fbo.remove();
 			}
+			printf("Destroyed: Upscale Pass\n");
 		}
 
 		gl::texture* scale_output(

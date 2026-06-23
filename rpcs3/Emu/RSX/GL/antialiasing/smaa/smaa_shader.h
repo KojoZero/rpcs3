@@ -17,7 +17,7 @@ const char* CONVERT_COLORS_FRAG = R"(
 
 layout(location = 0) in vec2 frag_tex_coord;
 layout(location = 0) out vec4 color;
-layout(binding = 31) uniform sampler2D color_texture;
+layout(binding = 0) uniform sampler2D color_texture;
 uniform int convert_colors;
 
 vec3 sRGBToLinear(vec3 c) {
@@ -88,7 +88,7 @@ uniform vec4 i_resolution;
 layout(location = 0) in vec2 frag_tex_coord;
 layout(location = 1) in vec4 offset[3];
 layout(location = 0) out vec4 color;
-layout(binding = 31) uniform sampler2D color_texture;
+layout(binding = 0) uniform sampler2D color_texture;
 
 #define SMAA_INCLUDE_VS 0
 #include "SMAA.hlsl"
@@ -149,9 +149,9 @@ layout(location = 0) in vec2 frag_tex_coord;
 layout(location = 1) in vec2 pixcoord;
 layout(location = 2) in vec4 offset[3];
 layout(location = 0) out vec4 color;
-layout(binding = 31) uniform sampler2D color_texture;
-layout(binding = 30) uniform sampler2D areaTex;
-layout(binding = 29) uniform sampler2D searchTex;
+layout(binding = 0) uniform sampler2D color_texture;
+layout(binding = 1) uniform sampler2D areaTex;
+layout(binding = 2) uniform sampler2D searchTex;
 
 #define SMAA_INCLUDE_VS 0
 #include "SMAA.hlsl"
@@ -204,8 +204,8 @@ uniform int convert_colors;
 layout(location = 0) in vec2 frag_tex_coord;
 layout(location = 1) in vec4 offset;
 layout(location = 0) out vec4 color;
-layout(binding = 31) uniform sampler2D color_texture;
-layout(binding = 30) uniform sampler2D SMAA_Input;
+layout(binding = 0) uniform sampler2D color_texture;
+layout(binding = 1) uniform sampler2D SMAA_Input;
 
 #define SMAA_INCLUDE_VS 0
 #include "SMAA.hlsl"

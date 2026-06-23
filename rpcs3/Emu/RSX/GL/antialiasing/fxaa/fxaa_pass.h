@@ -40,7 +40,7 @@ namespace gl
 		gl::buffer m_vbo;
 		gl::fbo m_fbo;
 		gl::sampler_state m_sampler;
-		std::unique_ptr<gl::viewable_image> m_intermediate_texture;
+		std::unique_ptr<gl::texture> m_intermediate_texture;
 		gl::glsl::shader m_vert_shader;
 		gl::glsl::shader m_frag_shader;
 		gl::glsl::program m_program;
