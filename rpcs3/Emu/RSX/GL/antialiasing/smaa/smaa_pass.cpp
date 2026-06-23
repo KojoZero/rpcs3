@@ -249,7 +249,6 @@ namespace gl
 		reset_sampler_states();
 
 		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// Create Neighborhood Blending Texture
 		m_fbo.color = m_intermediate_texture[2]->id();

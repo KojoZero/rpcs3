@@ -26,7 +26,7 @@ namespace gl
 		LANCZOS3_PASS_X_VERT_DATA[1] = LANCZOS3_PASS_1_VERT;
 		LANCZOS3_PASS_X_FRAG_DATA[1] = LANCZOS3_PASS_1_FRAG;
 
-		for (size_t i = 0; i < m_vert_shader.size() - 1; i++)
+		for (size_t i = 0; i < m_vert_shader.size(); i++)
 		{
 			m_vert_shader[i].create(::glsl::program_domain::glsl_vertex_program, LANCZOS3_PASS_X_VERT_DATA[i]);
 			m_vert_shader[i].compile();
@@ -125,7 +125,7 @@ namespace gl
 		glViewport(0, 0, src_region.width(), dst_region.height());
 		cmd->clear_color(color4f(0, 0, 0, 1));
 		glClear(GL_COLOR_BUFFER_BIT);
-		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[1]);
+		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[0]);
 		cmd->bind_texture(0, GL_TEXTURE_2D, src->id());
 		cmd->use_program(m_program[0].id());
 		attachUniforms(m_program[0].id());
@@ -142,7 +142,7 @@ namespace gl
 		glViewport(0, 0, dst_region.width(), dst_region.height());
 		cmd->clear_color(color4f(0, 0, 0, 1));
 		glClear(GL_COLOR_BUFFER_BIT);
-		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[1]);
+		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[0]);
 		cmd->bind_texture(0, GL_TEXTURE_2D, m_intermediate_texture[0]->id());
 		cmd->use_program(m_program[1].id());
 		attachUniforms(m_program[1].id());
@@ -159,7 +159,7 @@ namespace gl
 			m_flip_fbo.color = m_intermediate_texture[1]->id();
 			m_flip_fbo.read_buffer(m_flip_fbo.color);
 			m_flip_fbo.draw_buffer(m_flip_fbo.color);
-			m_flip_fbo.blit(gl::screen, dst_region, dst_region, gl::buffers::color, gl::filter::linear);
+			m_flip_fbo.blit(gl::screen, dst_region.flipped_vertical(), dst_region, gl::buffers::color, gl::filter::linear);
 			return 0;
 		}
 		return m_intermediate_texture[1].get();
