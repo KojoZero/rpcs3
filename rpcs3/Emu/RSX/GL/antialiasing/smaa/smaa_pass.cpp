@@ -167,7 +167,7 @@ namespace gl
 
 	gl::texture* smaa_pass::antialias_output(gl::command_context& cmd, gl::texture* src, const areai& src_region)
 	{
-		if (src_region != prev_src_region)
+		if (src_region.width() != prev_src_region.width() || src_region.height() != prev_src_region.height())
 		{
 			allocateTextures(src_region);
 			prev_src_region = src_region;
@@ -177,6 +177,8 @@ namespace gl
 		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &prev_vao);
 		m_vao.bind();
 		m_fbo.bind();
+
+		cmd->disablei(GL_BLEND, 0);
 
 		// Create Src Texture with stripped transparency
 		m_fbo.color = m_intermediate_texture[4]->id();
@@ -208,8 +210,6 @@ namespace gl
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 		reset_sampler_states();
-
-		glDisable(GL_BLEND);
 
 		// Create Edge Detection Texture
 		m_fbo.color = m_intermediate_texture[0]->id();
@@ -247,7 +247,7 @@ namespace gl
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 		reset_sampler_states();
 
-		glEnable(GL_BLEND);
+		cmd->enablei(GL_BLEND, 0);
 
 		// Create Neighborhood Blending Texture
 		m_fbo.color = m_intermediate_texture[2]->id();
@@ -267,8 +267,6 @@ namespace gl
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 		reset_sampler_states();
-
-		glDisable(GL_BLEND);
 		glBindVertexArray(prev_vao);
 
 		return m_intermediate_texture[2].get();

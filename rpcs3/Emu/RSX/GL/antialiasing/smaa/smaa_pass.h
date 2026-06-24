@@ -59,5 +59,6 @@ namespace gl
 		std::array<ScreenRectVertex, 4> m_vertices;
 
 		GLint prev_vao;
+		GLboolean prev_blend_state;
 	};
 } // namespace gl
