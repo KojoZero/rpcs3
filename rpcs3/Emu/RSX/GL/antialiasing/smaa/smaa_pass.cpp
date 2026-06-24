@@ -6,12 +6,18 @@ namespace gl
 {
 	smaa_pass::smaa_pass()
 	{
+		m_vertices = {
+			ScreenRectVertex(-1.f, 1.f, 0.f, 1.f),  // Left,  Top
+			ScreenRectVertex(1.f, 1.f, 1.f, 1.f),   // Right, Top
+			ScreenRectVertex(-1.f, -1.f, 0.f, 0.f), // Left,  Bottom
+			ScreenRectVertex(1.f, -1.f, 1.f, 0.f),  // Right, Bottom
+		};
+		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &prev_vao);
 		m_vao.create();
 		m_vao.bind();
-		m_vbo.create();
+		m_vbo.create(sizeof(ScreenRectVertex) * 4, m_vertices.data(), gl::buffer::memory_type::local, 0);
 		m_vbo.bind();
 		printf("Created VAO/VBO\n");
-		glBufferData(GL_ARRAY_BUFFER, sizeof(ScreenRectVertex) * 4, nullptr, GL_STREAM_DRAW);
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenRectVertex), reinterpret_cast<void*>(offsetof(ScreenRectVertex, position)));
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenRectVertex), reinterpret_cast<void*>(offsetof(ScreenRectVertex, tex_coord)));
 		glEnableVertexAttribArray(0);
@@ -58,18 +64,12 @@ namespace gl
 		m_sampler[1].create();
 		m_sampler[1].apply_defaults(GL_LINEAR);
 		m_fbo.create();
-		m_vertices = {
-			ScreenRectVertex(-1.f, 1.f, 0.f, 1.f),  // Left,  Top
-			ScreenRectVertex(1.f, 1.f, 1.f, 1.f),   // Right, Top
-			ScreenRectVertex(-1.f, -1.f, 0.f, 0.f), // Left,  Bottom
-			ScreenRectVertex(1.f, -1.f, 1.f, 0.f),  // Right, Bottom
-		};
 		printf("Created FBO/Sampler\n");
 		allocateLookupTextures();
 		printf("Allocated SMAA Textures\n");
 		allocateTextures(prev_src_region);
 		printf("Allocated Textures\n");
-		glBindVertexArray(GL_NONE);
+		glBindVertexArray(prev_vao);
 	}
 
 	smaa_pass::~smaa_pass()
@@ -174,6 +174,7 @@ namespace gl
 		}
 
 		// Bind Framebuffer and VAO
+		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &prev_vao);
 		m_vao.bind();
 		m_fbo.bind();
 
@@ -189,7 +190,6 @@ namespace gl
 		cmd->use_program(m_program[3].id());
 		attachUniforms(m_program[3].id());
 		glUniform1i(uniform_locs.convert_colors, 0);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(m_vertices), m_vertices.data());
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		reset_sampler_states();
 
@@ -205,7 +205,6 @@ namespace gl
 		cmd->use_program(m_program[3].id());
 		attachUniforms(m_program[3].id());
 		glUniform1i(uniform_locs.convert_colors, 1);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(m_vertices), m_vertices.data());
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 		reset_sampler_states();
@@ -224,7 +223,6 @@ namespace gl
 		cmd->use_program(m_program[0].id());
 		attachUniforms(m_program[0].id());
 		glUniform4f(uniform_locs.i_resolution, src_region.width(), src_region.height(), 1.0f / src_region.width(), 1.0f / src_region.height());
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(m_vertices), m_vertices.data());
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 		reset_sampler_states();
@@ -245,7 +243,6 @@ namespace gl
 		cmd->use_program(m_program[1].id());
 		attachUniforms(m_program[1].id());
 		glUniform4f(uniform_locs.i_resolution, src_region.width(), src_region.height(), 1.0f / src_region.width(), 1.0f / src_region.height());
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(m_vertices), m_vertices.data());
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 		reset_sampler_states();
@@ -267,12 +264,12 @@ namespace gl
 		attachUniforms(m_program[2].id());
 		glUniform4f(uniform_locs.i_resolution, src_region.width(), src_region.height(), 1.0f / src_region.width(), 1.0f / src_region.height());
 		glUniform1i(uniform_locs.convert_colors, 2);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(m_vertices), m_vertices.data());
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 		reset_sampler_states();
 
 		glDisable(GL_BLEND);
+		glBindVertexArray(prev_vao);
 
 		return m_intermediate_texture[2].get();
 	}

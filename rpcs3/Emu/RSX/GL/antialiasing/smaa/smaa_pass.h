@@ -58,5 +58,6 @@ namespace gl
 			std::string include_content);
 		std::array<ScreenRectVertex, 4> m_vertices;
 
+		GLint prev_vao;
 	};
 } // namespace gl

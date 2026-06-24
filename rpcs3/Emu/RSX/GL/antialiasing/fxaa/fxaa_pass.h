@@ -49,5 +49,7 @@ namespace gl
 		void attachUniforms(GLuint shader_program_id);
 		void allocateTextures(areai internal_res);
 		std::array<ScreenRectVertex, 4> m_vertices;
+
+		GLint prev_vao;
 	};
 } // namespace gl
