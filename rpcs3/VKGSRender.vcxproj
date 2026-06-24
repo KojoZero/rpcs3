@@ -11,8 +11,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Emu\RSX\VK\antialiasing\antialiasing.h" />
+    <ClInclude Include="Emu\RSX\VK\antialiasing\fxaa\fxaa_pass.h" />
+    <ClInclude Include="Emu\RSX\VK\antialiasing\fxaa\fxaa_shader.h" />
+    <ClInclude Include="Emu\RSX\VK\antialiasing\smaa\smaa_pass.h" />
+    <ClInclude Include="Emu\RSX\VK\antialiasing\smaa\smaa_shader.h" />
+    <ClInclude Include="Emu\RSX\VK\antialiasing\smaa\textures\AreaTex.h" />
+    <ClInclude Include="Emu\RSX\VK\antialiasing\smaa\textures\SearchTex.h" />
     <ClInclude Include="Emu\RSX\VK\upscalers\bilinear_pass.hpp" />
     <ClInclude Include="Emu\RSX\VK\upscalers\fsr_pass.h" />
+    <ClInclude Include="Emu\RSX\VK\upscalers\lanczos3\lanczos3_pass.h" />
+    <ClInclude Include="Emu\RSX\VK\upscalers\lanczos3\lanczos3_shader.h" />
     <ClInclude Include="Emu\RSX\VK\upscalers\nearest_pass.hpp" />
     <ClInclude Include="Emu\RSX\VK\upscalers\upscaling.h" />
     <ClInclude Include="Emu\RSX\VK\VKAsyncScheduler.h" />
@@ -72,7 +81,10 @@
     <ClInclude Include="Emu\RSX\VK\VulkanAPI.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Emu\RSX\VK\antialiasing\fxaa\fxaa_pass.cpp" />
+    <ClCompile Include="Emu\RSX\VK\antialiasing\smaa\smaa_pass.cpp" />
     <ClCompile Include="Emu\RSX\VK\upscalers\fsr1\fsr_pass.cpp" />
+    <ClCompile Include="Emu\RSX\VK\upscalers\lanczos3\lanczos3_pass.cpp" />
     <ClCompile Include="Emu\RSX\VK\VKAsyncScheduler.cpp" />
     <ClCompile Include="Emu\RSX\VK\VKCommandStream.cpp" />
     <ClCompile Include="Emu\RSX\VK\VKCommonDecompiler.cpp" />

@@ -87,6 +87,15 @@
     <ClCompile Include="Emu\RSX\VK\vkutils\unique_resource.cpp">
       <Filter>vkutils</Filter>
     </ClCompile>
+    <ClCompile Include="Emu\RSX\VK\antialiasing\fxaa\fxaa_pass.cpp">
+      <Filter>antialiasing\fxaa</Filter>
+    </ClCompile>
+    <ClCompile Include="Emu\RSX\VK\antialiasing\smaa\smaa_pass.cpp">
+      <Filter>antialiasing\smaa</Filter>
+    </ClCompile>
+    <ClCompile Include="Emu\RSX\VK\upscalers\lanczos3\lanczos3_pass.cpp">
+      <Filter>upscalers\lanczos3</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Emu\RSX\VK\VKCommonDecompiler.h" />
@@ -212,6 +221,33 @@
     <ClInclude Include="Emu\RSX\VK\vkutils\unique_resource.h">
       <Filter>vkutils</Filter>
     </ClInclude>
+    <ClInclude Include="Emu\RSX\VK\antialiasing\fxaa\fxaa_pass.h">
+      <Filter>antialiasing\fxaa</Filter>
+    </ClInclude>
+    <ClInclude Include="Emu\RSX\VK\antialiasing\fxaa\fxaa_shader.h">
+      <Filter>antialiasing\fxaa</Filter>
+    </ClInclude>
+    <ClInclude Include="Emu\RSX\VK\antialiasing\smaa\smaa_pass.h">
+      <Filter>antialiasing\smaa</Filter>
+    </ClInclude>
+    <ClInclude Include="Emu\RSX\VK\antialiasing\smaa\smaa_shader.h">
+      <Filter>antialiasing\smaa</Filter>
+    </ClInclude>
+    <ClInclude Include="Emu\RSX\VK\antialiasing\smaa\textures\AreaTex.h">
+      <Filter>antialiasing\smaa\textures</Filter>
+    </ClInclude>
+    <ClInclude Include="Emu\RSX\VK\antialiasing\smaa\textures\SearchTex.h">
+      <Filter>antialiasing\smaa\textures</Filter>
+    </ClInclude>
+    <ClInclude Include="Emu\RSX\VK\antialiasing\antialiasing.h">
+      <Filter>antialiasing</Filter>
+    </ClInclude>
+    <ClInclude Include="Emu\RSX\VK\upscalers\lanczos3\lanczos3_shader.h">
+      <Filter>upscalers\lanczos3</Filter>
+    </ClInclude>
+    <ClInclude Include="Emu\RSX\VK\upscalers\lanczos3\lanczos3_pass.h">
+      <Filter>upscalers\lanczos3</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="vkutils">
@@ -222,6 +258,21 @@
     </Filter>
     <Filter Include="upscalers\fsr1">
       <UniqueIdentifier>{8387b0fc-178f-4c9c-9cf2-03df99ce4df2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="upscalers\lanczos3">
+      <UniqueIdentifier>{a1f4d745-ab54-4e69-80da-334bb32b34c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="antialiasing">
+      <UniqueIdentifier>{331dcd40-7c05-470b-b0bc-90a0efedcdc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="antialiasing\fxaa">
+      <UniqueIdentifier>{7dc21b8a-203c-420c-b7d7-9427b8138c6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="antialiasing\smaa">
+      <UniqueIdentifier>{0b96b623-effe-4502-b9a3-27a1dc6a7d23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="antialiasing\smaa\textures">
+      <UniqueIdentifier>{1b2f3f79-82b1-4164-b198-94f9163cf6a6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
