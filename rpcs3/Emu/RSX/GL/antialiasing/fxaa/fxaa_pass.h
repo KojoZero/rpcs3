@@ -44,9 +44,10 @@ namespace gl
 		gl::glsl::shader m_vert_shader;
 		gl::glsl::shader m_frag_shader;
 		gl::glsl::program m_program;
+		areai prev_src_region = {0, 0, 1, 1};
 		uniform_locations uniform_locs;
 		void attachUniforms(GLuint shader_program_id);
-		void allocateTextures(int width, int height);
+		void allocateTextures(areai internal_res);
 		std::array<ScreenRectVertex, 4> m_vertices;
 	};
 } // namespace gl

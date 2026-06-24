@@ -48,10 +48,11 @@ namespace gl
 		std::array<gl::glsl::shader, 4> m_vert_shader;
 		std::array<gl::glsl::shader, 4> m_frag_shader;
 		std::array<gl::glsl::program, 4>  m_program;
+		areai prev_src_region = {0, 0, 1, 1};
 		uniform_locations uniform_locs;
 		void reset_sampler_states();
 		void attachUniforms(GLuint shader_program_id);
-		void allocateTextures(int width, int height);
+		void allocateTextures(areai internal_res);
 		void allocateLookupTextures();
 		void replaceInclude(std::string& shader_source, std::string include_name,
 			std::string include_content);

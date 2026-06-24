@@ -52,6 +52,7 @@ namespace gl
 		printf("Allocated LANCZOS3 Textures\n");
 		allocateTextures(prev_src_region, prev_dst_region);
 		printf("Allocated Textures\n");
+		glBindVertexArray(GL_NONE);
 	}
 
 	lanczos3_pass::~lanczos3_pass()
@@ -105,7 +106,6 @@ namespace gl
 		const areai& dst_region,
 		gl::flags32_t mode)
 	{
-		// TODO: Implement Texture Reallocation on Resolution Scale Change (or if resolution higher than preallocated texture)
 		if (src_region != prev_src_region || dst_region != prev_dst_region)
 		{
 			allocateTextures(src_region, dst_region);
@@ -160,6 +160,8 @@ namespace gl
 			m_flip_fbo.blit(gl::screen, dst_region.flipped_vertical(), dst_region, gl::buffers::color, gl::filter::linear);
 			return 0;
 		}
+
+		
 		return m_intermediate_texture[1].get();
 	}
 } // namespace gl

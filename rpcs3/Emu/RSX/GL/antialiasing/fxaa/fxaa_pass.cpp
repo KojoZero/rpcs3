@@ -33,8 +33,9 @@ namespace gl
 			ScreenRectVertex(1.f, -1.f, 1.f, 0.f),  // Right, Bottom
 		};
 		printf("Created FBO/Sampler\n");
-		allocateTextures(1280, 720);
+		allocateTextures(prev_src_region);
 		printf("Allocated Textures\n");
+		glBindVertexArray(GL_NONE);
 	}
 
 
@@ -56,18 +57,22 @@ namespace gl
 		uniform_locs.convert_colors = glGetUniformLocation(shader_program_id, "convert_colors");
 	}
 
-	void fxaa_pass::allocateTextures(int width, int height) {
+	void fxaa_pass::allocateTextures(areai internal_res)
+	{
 		m_intermediate_texture.reset();
-		m_intermediate_texture = std::make_unique<gl::texture>(GL_TEXTURE_2D, width, height, 1, 1, 1, GL_RGBA16F, RSX_FORMAT_CLASS_COLOR);
+		m_intermediate_texture = std::make_unique<gl::texture>(GL_TEXTURE_2D, internal_res.width(), internal_res.height(), 1, 1, 1, GL_RGBA16F, RSX_FORMAT_CLASS_COLOR);
 	}
 
 	gl::texture* fxaa_pass::antialias_output(gl::command_context& cmd, gl::texture* src, const areai& src_region) {
-		// TODO: Implement Texture Reallocation on Resolution Scale Change (or if resolution higher than preallocated texture)
+		if (src_region != prev_src_region)
+		{
+			allocateTextures(src_region);
+			prev_src_region = src_region;
+		}
 
 		// Bind Framebuffer and VAO
 		m_vao.bind();
 		m_fbo.bind();
-
 
 		// Start Antialiasing
 		m_fbo.color = m_intermediate_texture->id();
