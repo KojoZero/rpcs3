@@ -779,6 +779,42 @@ void VKGSRender::flip(const rsx::display_flip_info_t& info)
 		target_layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 	}
 
+	//if (!m_antialiasing_filter || m_post_antialiasing != g_cfg.video.post_antialiasing)
+	//{
+	//	m_post_antialiasing = g_cfg.video.post_antialiasing;
+
+	//	switch (m_post_antialiasing)
+	//	{
+	//	case post_antialiasing_mode::fxaa:
+	//		printf("Post Antialiasing Mode: FXAA SELECTED\n");
+	//		m_antialiasing_filter = std::make_unique<vk::fxaa_pass>();
+	//		printf("Post Antialiasing Mode: FXAA CREATED\n");
+	//		postAntialiasingEnabled = true;
+	//		break;
+	//	case post_antialiasing_mode::smaa:
+	//		printf("Post Antialiasing Mode: SMAA SELECTED\n");
+	//		m_antialiasing_filter = std::make_unique<vk::smaa_pass>();
+	//		printf("Post Antialiasing Mode: SMAA CREATED\n");
+	//		postAntialiasingEnabled = true;
+	//		break;
+	//	default:
+	//		printf("Post Antialiasing Mode: NONE SELECTED\n");
+	//		postAntialiasingEnabled = false;
+	//		break;
+	//	}
+	//}
+
+	//m_post_antialiasing = g_cfg.video.post_antialiasing;
+	//if (m_post_antialiasing == post_antialiasing_mode::none)
+	//{
+	//	postAntialiasingEnabled = false;
+	//}
+	//else
+	//{
+	//	postAntialiasingEnabled = true;
+	//}
+
+
 	const output_scaling_mode output_scaling = g_cfg.video.output_scaling.get();
 
 	if (!m_upscaler || m_output_scaling != output_scaling)
@@ -793,6 +829,10 @@ void VKGSRender::flip(const rsx::display_flip_info_t& info)
 		{
 			m_upscaler = std::make_unique<vk::fsr_upscale_pass>();
 		}
+		//else if (m_output_scaling == output_scaling_mode::lanczos3)
+		//{
+		//	m_upscaler = std::make_unique<vk::lanczos3_pass>();
+		//}
 		else
 		{
 			m_upscaler = std::make_unique<vk::bilinear_upscale_pass>();

@@ -3,6 +3,12 @@
 
 #include "../vkutils/commands.h"
 #include "../vkutils/image.h"
+#include "../vkutils/sampler.h"
+#include "../vkutils/device.h"
+#include "../VKHelpers.h"
+#include "../VKProgramPipeline.h"
+#include "../VKPipelineCompiler.h"
+#include "../VKRenderPass.h"
 //#include "../glutils/image.h"
 //#include "../glutils/state_tracker.hpp"
 //#include "../glutils/buffer_object.h"
@@ -12,16 +18,6 @@
 //#include "../glutils/program.h"
 namespace vk
 {
-	//struct antialiasing_filter
-	//{
-	//	virtual ~antialiasing_filter() {}
-
-	//	virtual gl::texture* antialias_output(
-	//		gl::command_context& cmd, // State
-	//		gl::texture* src,         // Source input
-	//		const areai& src_region  // Scaling request information
-	//		) = 0;
-	//};
 	struct antialiasing_filter
 	{
 		virtual ~antialiasing_filter() {}
@@ -33,4 +29,4 @@ namespace vk
 			VkImageLayout present_surface_layout // Present surface layout, or VK_IMAGE_LAYOUT_UNDEFINED if no present target is provided
 			) = 0;
 	};
-} // namespace gl
+} // namespace vk

@@ -89,7 +89,14 @@ namespace vk
 			op_flags flags, callback_t callback = {},
 			const std::vector<glsl::program_input>& vs_inputs = {},
 			const std::vector<glsl::program_input>& fs_inputs = {});
-
+		std::unique_ptr<glsl::program> compile(
+			const vk::pipeline_props& create_info,
+			VkPipelineVertexInputStateCreateInfo vertexInputInfo,
+			VkShaderModule vs,
+			VkShaderModule fs,
+			op_flags flags, callback_t callback = {},
+			const std::vector<glsl::program_input>& vs_inputs = {},
+			const std::vector<glsl::program_input>& fs_inputs = {});
 		std::unique_ptr<glsl::program> compile(
 			graphics_pipe_create_callback_t get_create_info,
 			op_flags flags, callback_t callback,
@@ -201,6 +208,14 @@ namespace vk
 
 		std::unique_ptr<glsl::program> int_compile_graphics_pipe(
 			const vk::pipeline_props &create_info,
+			VkShaderModule modules[2],
+			const std::vector<glsl::program_input>& vs_inputs,
+			const std::vector<glsl::program_input>& fs_inputs,
+			op_flags flags);
+
+		std::unique_ptr<glsl::program> int_compile_graphics_pipe(
+			const vk::pipeline_props& create_info,
+			VkPipelineVertexInputStateCreateInfo vertexInputInfo,
 			VkShaderModule modules[2],
 			const std::vector<glsl::program_input>& vs_inputs,
 			const std::vector<glsl::program_input>& fs_inputs,

@@ -4,52 +4,56 @@
 
 namespace vk
 {
-	//class fxaa_pass : public antialiasing_filter
-	//{
+	class fxaa_pass : public antialiasing_filter
+	{
 	//struct uniform_locations
 	//{
 	//	GLuint i_resolution;
 	//	GLuint convert_colors;
 	//};
-	//struct ScreenRectVertex
-	//{
-	//	ScreenRectVertex() = default;
-	//	ScreenRectVertex(GLfloat x, GLfloat y, GLfloat u, GLfloat v)
-	//	{
-	//		position[0] = x;
-	//		position[1] = y;
-	//		tex_coord[0] = u;
-	//		tex_coord[1] = v;
-	//	}
+	struct ScreenRectVertex
+	{
+		ScreenRectVertex() = default;
+		ScreenRectVertex(float x, float y, float u, float v)
+		{
+			position[0] = x;
+			position[1] = y;
+			tex_coord[0] = u;
+			tex_coord[1] = v;
+		}
 
-	//	std::array<GLfloat, 2> position{};
-	//	std::array<GLfloat, 2> tex_coord{};
-	//};
-	//public:
-	//	fxaa_pass();
-	//	~fxaa_pass();
+		std::array<float, 2> position{};
+		std::array<float, 2> tex_coord{};
+	};
+	public:
+		fxaa_pass();
+		~fxaa_pass();
 
-	//	gl::texture* antialias_output(
-	//		gl::command_context& cmd, // State
-	//		gl::texture* src,         // Source input
-	//		const areai& src_region  // Scaling request information
-	//		) override;
+		vk::viewable_image* antialias_output(
+			const vk::command_buffer& cmd,       // CB
+			vk::viewable_image* src,             // Source input
+			VkImage present_surface,             // Present target. May be VK_NULL_HANDLE for some passes
+			VkImageLayout present_surface_layout // Present surface layout, or VK_IMAGE_LAYOUT_UNDEFINED if no present target is provided
+			) = 0;
 
-	//private:
-	//	gl::vao m_vao;
-	//	gl::buffer m_vbo;
-	//	gl::fbo m_fbo;
-	//	gl::sampler_state m_sampler;
-	//	std::unique_ptr<gl::texture> m_intermediate_texture;
-	//	gl::glsl::shader m_vert_shader;
-	//	gl::glsl::shader m_frag_shader;
-	//	gl::glsl::program m_program;
-	//	areai prev_src_region = {0, 0, 1, 1};
-	//	uniform_locations uniform_locs;
-	//	void attachUniforms(GLuint shader_program_id);
-	//	void allocateTextures(areai internal_res);
-	//	std::array<ScreenRectVertex, 4> m_vertices;
+	private:
+		//gl::vao m_vao;
+		//gl::buffer m_vbo;
+		//gl::fbo m_fbo;
+		std::unique_ptr<vk::sampler> m_sampler;
+		std::unique_ptr<vk::viewable_image> m_intermediate_texture;
+		vk::glsl::shader m_vert_shader;
+		vk::glsl::shader m_frag_shader;
+		std::unique_ptr<vk::glsl::program> m_program;
+		//gl::glsl::program m_program;
+		//areai prev_src_region = {0, 0, 1, 1};
+		//uniform_locations uniform_locs;
+		//void attachUniforms(GLuint shader_program_id);
+		//	GLint prev_vao;
+		void allocateTextures(areai internal_res);
+		void compileShaderProgram(vk::glsl::shader vs, vk::glsl::shader fs, std::unique_ptr<vk::glsl::program>& shader_program);
+		std::array<ScreenRectVertex, 4> m_vertices;
 
-	//	GLint prev_vao;
-	//};
+	
+	};
 } // namespace gl
