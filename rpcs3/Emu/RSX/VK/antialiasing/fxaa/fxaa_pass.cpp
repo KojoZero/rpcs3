@@ -112,7 +112,7 @@ namespace vk
 			},
 		};
 
-		VkPipelineVertexInputStateCreateInfo vertex_input_info = {
+		VkPipelineVertexInputStateCreateInfo vi = {
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
 			.vertexBindingDescriptionCount = 1,
 			.pVertexBindingDescriptions = &vertex_binding,
@@ -128,6 +128,7 @@ namespace vk
 		create_info_pipeline_state.cs = cs;
 		create_info_pipeline_state.rs = rs;
 		create_info_pipeline_state.ms = ms;
+		create_info_pipeline_state.vi = vi;
 		
 		u64 create_info_renderpass_key = vk::get_renderpass_key(VK_FORMAT_R16G16B16A16_SFLOAT);
 
@@ -137,8 +138,20 @@ namespace vk
 			.renderpass_key = create_info_renderpass_key
 		};
 
+		// Setup Inputs
+		std::vector<vk::glsl::program_input> inputs =
+		{
+			glsl::program_input::make(
+				::glsl::program_domain::glsl_fragment_program,
+				"color_texture",
+				vk::glsl::input_type_texture,
+				0,
+				0),
+		};
+
+
 		auto compiler = vk::get_pipe_compiler();
-		shader_program = compiler->compile(create_info_props, vertex_input_info, vs.get_handle(), fs.get_handle(), vk::pipe_compiler::COMPILE_INLINE, {}, {});
+		shader_program = compiler->compile(create_info_props, vs.get_handle(), fs.get_handle(), vk::pipe_compiler::COMPILE_INLINE, {}, {});
 	}
 
 	fxaa_pass::~fxaa_pass() {

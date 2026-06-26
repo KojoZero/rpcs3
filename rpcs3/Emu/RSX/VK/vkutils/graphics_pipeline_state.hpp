@@ -13,6 +13,7 @@ namespace vk
 		VkPipelineColorBlendStateCreateInfo cs;
 		VkPipelineRasterizationStateCreateInfo rs;
 		VkPipelineMultisampleStateCreateInfo ms;
+		VkPipelineVertexInputStateCreateInfo vi;
 
 		struct extra_parameters
 		{
@@ -37,6 +38,8 @@ namespace vk
 
 			ms.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 			ms.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+
+			vi.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 			temp_storage.msaa_sample_mask = 0xFFFFFFFF;
 		}
 

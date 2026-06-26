@@ -125,7 +125,7 @@ namespace vk
 		dynamic_state_info.pDynamicStates = dynamic_state_descriptors.data();
 		dynamic_state_info.dynamicStateCount = ::size32(dynamic_state_descriptors);
 
-		VkPipelineVertexInputStateCreateInfo vi = { VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
+		VkPipelineVertexInputStateCreateInfo vi = create_info.state.vi;
 
 		VkPipelineViewportStateCreateInfo vp = {};
 		vp.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -179,108 +179,6 @@ namespace vk
 		return int_compile_graphics_pipe(info, vs_inputs, fs_inputs, flags);
 	}
 
-		std::unique_ptr<glsl::program> pipe_compiler::int_compile_graphics_pipe(
-		const vk::pipeline_props& create_info,
-		VkPipelineVertexInputStateCreateInfo vertexInputInfo,
-		VkShaderModule modules[2],
-		const std::vector<glsl::program_input>& vs_inputs,
-		const std::vector<glsl::program_input>& fs_inputs,
-		op_flags flags)
-	{
-		VkPipelineShaderStageCreateInfo shader_stages[2] = {};
-		shader_stages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shader_stages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-		shader_stages[0].module = modules[0];
-		shader_stages[0].pName = "main";
-
-		shader_stages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shader_stages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-		shader_stages[1].module = modules[1];
-		shader_stages[1].pName = "main";
-
-		std::vector<VkDynamicState> dynamic_state_descriptors;
-		dynamic_state_descriptors.push_back(VK_DYNAMIC_STATE_VIEWPORT);
-		dynamic_state_descriptors.push_back(VK_DYNAMIC_STATE_SCISSOR);
-		dynamic_state_descriptors.push_back(VK_DYNAMIC_STATE_LINE_WIDTH);
-		dynamic_state_descriptors.push_back(VK_DYNAMIC_STATE_BLEND_CONSTANTS);
-		dynamic_state_descriptors.push_back(VK_DYNAMIC_STATE_STENCIL_COMPARE_MASK);
-		dynamic_state_descriptors.push_back(VK_DYNAMIC_STATE_STENCIL_WRITE_MASK);
-		dynamic_state_descriptors.push_back(VK_DYNAMIC_STATE_STENCIL_REFERENCE);
-		dynamic_state_descriptors.push_back(VK_DYNAMIC_STATE_DEPTH_BIAS);
-
-		auto pdss = &create_info.state.ds;
-		VkPipelineDepthStencilStateCreateInfo ds2;
-		if (g_render_device->get_depth_bounds_support()) [[likely]]
-		{
-			dynamic_state_descriptors.push_back(VK_DYNAMIC_STATE_DEPTH_BOUNDS);
-		}
-		else if (pdss->depthBoundsTestEnable)
-		{
-			rsx_log.warning("Depth bounds test is enabled in the pipeline object but not supported by the current driver.");
-
-			ds2 = *pdss;
-			pdss = &ds2;
-			ds2.depthBoundsTestEnable = VK_FALSE;
-		}
-
-		VkPipelineDynamicStateCreateInfo dynamic_state_info = {};
-		dynamic_state_info.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-		dynamic_state_info.pDynamicStates = dynamic_state_descriptors.data();
-		dynamic_state_info.dynamicStateCount = ::size32(dynamic_state_descriptors);
-
-		VkPipelineVertexInputStateCreateInfo vi = vertexInputInfo;
-
-		VkPipelineViewportStateCreateInfo vp = {};
-		vp.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-		vp.viewportCount = 1;
-		vp.scissorCount = 1;
-
-		auto pmss = &create_info.state.ms;
-		VkPipelineMultisampleStateCreateInfo ms2;
-		ensure(pmss->rasterizationSamples == VkSampleCountFlagBits((create_info.renderpass_key >> 16) & 0xF)); // "Multisample state mismatch!"
-
-		if (pmss->rasterizationSamples != VK_SAMPLE_COUNT_1_BIT || pmss->sampleShadingEnable) [[unlikely]]
-		{
-			ms2 = *pmss;
-			pmss = &ms2;
-
-			if (ms2.rasterizationSamples != VK_SAMPLE_COUNT_1_BIT)
-			{
-				// Update the sample mask pointer
-				ms2.pSampleMask = &create_info.state.temp_storage.msaa_sample_mask;
-			}
-
-			if (g_cfg.video.antialiasing_level == msaa_level::none && ms2.sampleShadingEnable)
-			{
-				// Do not compile with MSAA enabled if multisampling is disabled
-				rsx_log.warning("MSAA is disabled globally but a shader with multi-sampling enabled was submitted for compilation.");
-				ms2.sampleShadingEnable = VK_FALSE;
-			}
-		}
-
-		// Rebase pointers from pipeline structure in case it is moved/copied
-		VkPipelineColorBlendStateCreateInfo cs = create_info.state.cs;
-		cs.pAttachments = create_info.state.att_state;
-
-		VkGraphicsPipelineCreateInfo info = {};
-		info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-		info.pVertexInputState = &vi;
-		info.pInputAssemblyState = &create_info.state.ia;
-		info.pRasterizationState = &create_info.state.rs;
-		info.pColorBlendState = &cs;
-		info.pMultisampleState = pmss;
-		info.pViewportState = &vp;
-		info.pDepthStencilState = pdss;
-		info.stageCount = 2;
-		info.pStages = shader_stages;
-		info.pDynamicState = &dynamic_state_info;
-		info.layout = VK_NULL_HANDLE;
-		info.basePipelineIndex = -1;
-		info.basePipelineHandle = VK_NULL_HANDLE;
-		info.renderPass = vk::get_renderpass(*m_device, create_info.renderpass_key);
-
-		return int_compile_graphics_pipe(info, vs_inputs, fs_inputs, flags);
-	}
 	std::unique_ptr<glsl::program> pipe_compiler::int_compile_graphics_pipe(
 		graphics_pipe_create_callback_t pipe_info_create_fn,
 		const std::vector<glsl::program_input>& vs_inputs,
@@ -328,24 +226,6 @@ namespace vk
 		if (flags & COMPILE_INLINE)
 		{
 			return int_compile_graphics_pipe(create_info, modules, vs_inputs, fs_inputs, flags);
-		}
-
-		m_work_queue.push(create_info, modules, vs_inputs, fs_inputs, flags, callback);
-		return {};
-	}
-	std::unique_ptr<glsl::program> pipe_compiler::compile(
-		const vk::pipeline_props& create_info,
-		VkPipelineVertexInputStateCreateInfo vertexInputInfo,
-		VkShaderModule vs,
-		VkShaderModule fs,
-		op_flags flags, callback_t callback,
-		const std::vector<glsl::program_input>& vs_inputs,
-		const std::vector<glsl::program_input>& fs_inputs)
-	{
-		VkShaderModule modules[] = {vs, fs};
-		if (flags & COMPILE_INLINE)
-		{
-			return int_compile_graphics_pipe(create_info, vertexInputInfo, modules, vs_inputs, fs_inputs, flags);
 		}
 
 		m_work_queue.push(create_info, modules, vs_inputs, fs_inputs, flags, callback);
