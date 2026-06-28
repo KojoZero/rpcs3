@@ -5,6 +5,7 @@
 #include "upscalers/fsr_pass.h"
 #include "upscalers/nearest_pass.hpp"
 #include "upscalers/lanczos3/lanczos3_pass.h"
+#include "upscalers/bicubic_rcas/bicubic_rcas_pass.h"
 
 #include "antialiasing/fxaa/fxaa_pass.h"
 #include "antialiasing/smaa/smaa_pass.h"
@@ -450,6 +451,9 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 				break;
 			case output_scaling_mode::lanczos3:
 				m_upscaler = std::make_unique<gl::lanczos3_pass>();
+				break;
+			case output_scaling_mode::bicubic_rcas:
+				m_upscaler = std::make_unique<gl::bicubic_rcas_pass>();
 				break;
 			case output_scaling_mode::bilinear:
 			default:

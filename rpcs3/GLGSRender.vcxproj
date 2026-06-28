@@ -89,6 +89,8 @@
     <ClInclude Include="Emu\RSX\GL\GLTextureCache.h" />
     <ClInclude Include="Emu\RSX\GL\OpenGL.h" />
     <ClInclude Include="Emu\RSX\GL\GLTexture.h" />
+    <ClInclude Include="Emu\RSX\GL\upscalers\bicubic_rcas\bicubic_rcas_pass.h" />
+    <ClInclude Include="Emu\RSX\GL\upscalers\bicubic_rcas\bicubic_rcas_shader.h" />
     <ClInclude Include="Emu\RSX\GL\upscalers\bilinear_pass.hpp" />
     <ClInclude Include="Emu\RSX\GL\upscalers\fsr_pass.h" />
     <ClInclude Include="Emu\RSX\GL\upscalers\lanczos3\lanczos3_pass.h" />
@@ -127,6 +129,7 @@
     <ClCompile Include="Emu\RSX\GL\GLTexture.cpp" />
     <ClCompile Include="Emu\RSX\GL\GLVertexBuffers.cpp" />
     <ClCompile Include="Emu\RSX\GL\GLTextureCache.cpp" />
+    <ClCompile Include="Emu\RSX\GL\upscalers\bicubic_rcas\bicubic_rcas_pass.cpp" />
     <ClCompile Include="Emu\RSX\GL\upscalers\fsr1\fsr_pass.cpp" />
     <ClCompile Include="Emu\RSX\GL\upscalers\lanczos3\lanczos3_pass.cpp" />
   </ItemGroup>

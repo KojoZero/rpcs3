@@ -58,6 +58,9 @@
     <ClCompile Include="Emu\RSX\GL\upscalers\lanczos3\lanczos3_pass.cpp">
       <Filter>upscalers\lanczos3</Filter>
     </ClCompile>
+    <ClCompile Include="Emu\RSX\GL\upscalers\bicubic_rcas\bicubic_rcas_pass.cpp">
+      <Filter>upscalers\bicubic_rcas</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Emu\RSX\GL\GLTexture.h" />
@@ -161,6 +164,12 @@
     <ClInclude Include="Emu\RSX\GL\upscalers\lanczos3\lanczos3_pass.h">
       <Filter>upscalers\lanczos3</Filter>
     </ClInclude>
+    <ClInclude Include="Emu\RSX\GL\upscalers\bicubic_rcas\bicubic_rcas_pass.h">
+      <Filter>upscalers\bicubic_rcas</Filter>
+    </ClInclude>
+    <ClInclude Include="Emu\RSX\GL\upscalers\bicubic_rcas\bicubic_rcas_shader.h">
+      <Filter>upscalers\bicubic_rcas</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="glutils">
@@ -186,6 +195,9 @@
     </Filter>
     <Filter Include="upscalers\lanczos3">
       <UniqueIdentifier>{5e0a6c14-67f5-4a09-ad69-d7b47f7901cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="upscalers\bicubic_rcas">
+      <UniqueIdentifier>{86f16506-6f4f-4109-be3a-06ca18f70d23}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
