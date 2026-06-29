@@ -5,8 +5,10 @@ const char* FXAA_VERT = R"(
 layout(location = 0) in vec2 vert_position;
 layout(location = 1) in vec2 vert_tex_coord;
 layout(location = 0) out vec2 frag_tex_coord;
-
-uniform vec4 i_resolution;
+layout (push_constant) uniform DrawInfo {
+    vec4 i_resolution;
+	int convert_colors;
+};
 
 void main()
 {
@@ -71,9 +73,10 @@ FXAA_SUBPIX_CAP - Insures fine detail is not completely removed.
 layout(location = 0) in vec2 frag_tex_coord;
 layout(location = 0) out vec4 color;
 layout(binding = 0) uniform sampler2D color_texture;
-
-uniform vec4 i_resolution;
-uniform int convert_colors;
+layout (push_constant) uniform DrawInfo {
+    vec4 i_resolution;
+	int convert_colors;
+};
 
 #ifndef FXAA_PRESET
     #define FXAA_PRESET 5

@@ -207,7 +207,7 @@ namespace vk
 			auto p_compute_info = !p_graphics_info ? std::get_if<VkComputePipelineCreateInfo>(&m_info) : nullptr;
 			const bool is_graphics_pipe = p_graphics_info != nullptr;
 
-			if (!is_graphics_pipe) [[ likely ]]
+			if (!is_graphics_pipe)
 			{
 				// We only support compute and graphics, so disable this for compute
 				separate_objects = false;

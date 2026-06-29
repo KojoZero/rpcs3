@@ -22,19 +22,23 @@ namespace gl
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		printf("Set Vertex Attribs\n");
-		// Compile LANCZOS3 Shaders
-		std::array<std::string, 2> LANCZOS3_PASS_X_VERT_DATA;
-		std::array<std::string, 2> LANCZOS3_PASS_X_FRAG_DATA;
-		LANCZOS3_PASS_X_VERT_DATA[0] = LANCZOS3_PASS_0_VERT;
-		LANCZOS3_PASS_X_FRAG_DATA[0] = LANCZOS3_PASS_0_FRAG;
-		LANCZOS3_PASS_X_VERT_DATA[1] = LANCZOS3_PASS_1_VERT;
-		LANCZOS3_PASS_X_FRAG_DATA[1] = LANCZOS3_PASS_1_FRAG;
+		// Compile LANCZOS3_RCAS Shaders
+		std::array<std::string, 3> LANCZOS3_RCAS_PASS_X_VERT_DATA;
+		std::array<std::string, 3> LANCZOS3_RCAS_PASS_X_FRAG_DATA;
+		LANCZOS3_RCAS_PASS_X_VERT_DATA[0] = LANCZOS3_PASS_0_VERT;
+		LANCZOS3_RCAS_PASS_X_FRAG_DATA[0] = LANCZOS3_PASS_0_FRAG;
+		LANCZOS3_RCAS_PASS_X_VERT_DATA[1] = LANCZOS3_PASS_1_VERT;
+		LANCZOS3_RCAS_PASS_X_FRAG_DATA[1] = LANCZOS3_PASS_1_FRAG;
+		LANCZOS3_RCAS_PASS_X_VERT_DATA[2] = FSR_PASS_1_VERT;
+		LANCZOS3_RCAS_PASS_X_FRAG_DATA[2] = FSR_PASS_1_FRAG;
+		replaceInclude(LANCZOS3_RCAS_PASS_X_FRAG_DATA[2], "ffx_a.h", FFX_A);
+		replaceInclude(LANCZOS3_RCAS_PASS_X_FRAG_DATA[2], "ffx_fsr1.h", FFX_FSR1);
 
 		for (size_t i = 0; i < m_vert_shader.size(); i++)
 		{
-			m_vert_shader[i].create(::glsl::program_domain::glsl_vertex_program, LANCZOS3_PASS_X_VERT_DATA[i]);
+			m_vert_shader[i].create(::glsl::program_domain::glsl_vertex_program, LANCZOS3_RCAS_PASS_X_VERT_DATA[i]);
 			m_vert_shader[i].compile();
-			m_frag_shader[i].create(::glsl::program_domain::glsl_fragment_program, LANCZOS3_PASS_X_FRAG_DATA[i]);
+			m_frag_shader[i].create(::glsl::program_domain::glsl_fragment_program, LANCZOS3_RCAS_PASS_X_FRAG_DATA[i]);
 			m_frag_shader[i].compile();
 			m_program[i].create();
 			m_program[i].attach(m_vert_shader[i]);
@@ -49,7 +53,7 @@ namespace gl
 		m_sampler[1].apply_defaults(GL_LINEAR);
 		m_fbo.create();
 		printf("Created FBO/Sampler\n");
-		printf("Allocated LANCZOS3 Textures\n");
+		printf("Allocated LANCZOS3_RCAS Textures\n");
 		allocateTextures(prev_src_region, prev_dst_region);
 		printf("Allocated Textures\n");
 		glBindVertexArray(prev_vao);
@@ -57,7 +61,7 @@ namespace gl
 
 	lanczos3_pass::~lanczos3_pass()
 	{
-		printf("Destroying: LANCZOS3 PASS\n");
+		printf("Destroying: LANCZOS3_RCAS PASS\n");
 		m_vao.remove();
 		m_vbo.remove();
 		for (size_t i = 0; i < m_vert_shader.size(); i++)
@@ -73,12 +77,14 @@ namespace gl
 		{
 			m_intermediate_texture[i].reset();
 		}
-		printf("Destroyed: LANCZOS3 PASS\n");
+		printf("Destroyed: LANCZOS3_RCAS PASS\n");
 	}
 
 	void lanczos3_pass::attachUniforms(GLuint shader_program_id)
 	{
 		uniform_locs.i_resolution = glGetUniformLocation(shader_program_id, "i_resolution");
+		uniform_locs.o_resolution = glGetUniformLocation(shader_program_id, "o_resolution");
+		uniform_locs.fsr_sharpening = glGetUniformLocation(shader_program_id, "FSR_SHARPENING");
 	}
 
 	void lanczos3_pass::allocateTextures(areai internal_res, areai screen_res)
@@ -89,7 +95,22 @@ namespace gl
 		m_intermediate_texture[1].reset();
 		m_intermediate_texture[1] = std::make_unique<gl::texture>(GL_TEXTURE_2D, screen_res.width(), screen_res.height(), 1, 1, 1, GL_RGBA16F, RSX_FORMAT_CLASS_COLOR);
 		printf("Allocated Intemediate Texture: %d...\n", 1);
+		m_intermediate_texture[2].reset();
+		m_intermediate_texture[2] = std::make_unique<gl::texture>(GL_TEXTURE_2D, screen_res.width(), screen_res.height(), 1, 1, 1, GL_RGBA16F, RSX_FORMAT_CLASS_COLOR);
+		printf("Allocated Intemediate Texture: %d...\n", 2);
 	}
+
+	void lanczos3_pass::replaceInclude(std::string& shader_source, std::string include_name,
+		std::string include_content)
+	{
+		std::string include_string = std::format("#include \"{}\"", include_name);
+		std::size_t pos = shader_source.find(include_string);
+		if (pos == std::string::npos)
+		{
+			printf("Failed to replace include: %s, searched term: %s\n", include_name.c_str(), include_string.c_str());
+		}
+		shader_source.replace(pos, include_string.size(), include_content);
+	};
 
 	void lanczos3_pass::reset_sampler_states()
 	{
@@ -113,6 +134,9 @@ namespace gl
 			prev_src_region = src_region;
 			prev_dst_region = dst_region;
 		}
+
+		float cas_attenuation = 2.f - (g_cfg.video.rcas_sharpening_intensity / 50.f);
+
 		// Bind Framebuffer and VAO
 		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &prev_vao);
 		m_vao.bind();
@@ -150,6 +174,24 @@ namespace gl
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 		reset_sampler_states();
 
+		// RCAS Pass
+		m_fbo.color = m_intermediate_texture[2]->id();
+		m_fbo.read_buffer(m_fbo.color);
+		m_fbo.draw_buffer(m_fbo.color);
+		glViewport(0, 0, dst_region.width(), dst_region.height());
+		cmd->clear_color(color4f(0, 0, 0, 1));
+		glClear(GL_COLOR_BUFFER_BIT);
+		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[1]);
+		cmd->bind_texture(0, GL_TEXTURE_2D, m_intermediate_texture[1]->id());
+		cmd->use_program(m_program[2].id());
+		attachUniforms(m_program[2].id());
+		glUniform4f(uniform_locs.i_resolution, dst_region.width(), dst_region.height(), 1.0f / dst_region.width(), 1.0f / dst_region.height());
+		glUniform4f(uniform_locs.o_resolution, dst_region.width(), dst_region.height(), 1.0f / dst_region.width(), 1.0f / dst_region.height());
+		glUniform1f(uniform_locs.fsr_sharpening, cas_attenuation);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+		reset_sampler_states();
+
 		glBindVertexArray(prev_vao);
 
 		if (mode & UPSCALE_AND_COMMIT)
@@ -164,7 +206,7 @@ namespace gl
 			m_flip_fbo.blit(gl::screen, input_region, dst_region, gl::buffers::color, gl::filter::linear);
 			return 0;
 		}
-		
-		return m_intermediate_texture[1].get();
+
+		return m_intermediate_texture[2].get();
 	}
 } // namespace gl

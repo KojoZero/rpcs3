@@ -133,13 +133,25 @@ namespace vk
 		u64 create_info_renderpass_key = vk::get_renderpass_key(VK_FORMAT_R16G16B16A16_SFLOAT);
 
 		// Create Props and start Compiling
-		pipeline_props create_info_props = {
+		pipeline_props create_info_props =
+		{
 			.state = create_info_pipeline_state,
 			.renderpass_key = create_info_renderpass_key
 		};
 
 		// Setup Inputs
-		std::vector<vk::glsl::program_input> inputs =
+		std::vector<vk::glsl::program_input> vertex_inputs =
+		{
+			glsl::program_input::make(
+				::glsl::program_domain::glsl_vertex_program,
+				"vertex_push_constants",
+				glsl::program_input_type::input_type_push_constant,
+				0,
+				0,
+				glsl::push_constant_ref{.offset = 0, .size = sizeof(push_constant_uniform)})
+		};
+
+		std::vector<vk::glsl::program_input> fragment_inputs =
 		{
 			glsl::program_input::make(
 				::glsl::program_domain::glsl_fragment_program,
@@ -147,11 +159,18 @@ namespace vk
 				vk::glsl::input_type_texture,
 				0,
 				0),
+			glsl::program_input::make(
+				::glsl::program_domain::glsl_fragment_program,
+				"fragment_push_constants",
+				glsl::program_input_type::input_type_push_constant,
+				0,
+				0,
+				glsl::push_constant_ref{.offset = sizeof(push_constant_uniform), .size = sizeof(push_constant_uniform)})
 		};
-
+		
 
 		auto compiler = vk::get_pipe_compiler();
-		shader_program = compiler->compile(create_info_props, vs.get_handle(), fs.get_handle(), vk::pipe_compiler::COMPILE_INLINE, {}, {});
+		shader_program = compiler->compile(create_info_props, vs.get_handle(), fs.get_handle(), vk::pipe_compiler::COMPILE_INLINE, {}, vertex_inputs, fragment_inputs);
 	}
 
 	fxaa_pass::~fxaa_pass() {

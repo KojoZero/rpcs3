@@ -5,6 +5,10 @@ const char* CONVERT_COLORS_VERT = R"(
 layout(location = 0) in vec2 vert_position;
 layout(location = 1) in vec2 vert_tex_coord;
 layout(location = 0) out vec2 frag_tex_coord;
+layout (push_constant) uniform DrawInfo {
+    vec4 i_resolution;
+	int convert_colors;
+};
 
 void main() {
     gl_Position = vec4(vert_position, 0.0, 1.0);
@@ -18,7 +22,10 @@ const char* CONVERT_COLORS_FRAG = R"(
 layout(location = 0) in vec2 frag_tex_coord;
 layout(location = 0) out vec4 color;
 layout(binding = 0) uniform sampler2D color_texture;
-uniform int convert_colors;
+layout (push_constant) uniform DrawInfo {
+    vec4 i_resolution;
+	int convert_colors;
+};
 
 vec3 sRGBToLinear(vec3 c) {
     return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c));
@@ -50,7 +57,11 @@ const char* SMAA_PASS_0_VERT = R"(
 //-----------------------------------------------------------------------------
 // Edge Detection Shaders (First Pass)
 
-uniform vec4 i_resolution;
+layout (push_constant) uniform DrawInfo {
+    vec4 i_resolution;
+	int convert_colors;
+};
+
 #define SMAA_RT_METRICS vec4(i_resolution.z, i_resolution.w, i_resolution.x, i_resolution.y)
 #define SMAA_GLSL_4
 #define SMAA_FLIP_Y 0
@@ -78,7 +89,10 @@ const char* SMAA_PASS_0_FRAG = R"(
 //-----------------------------------------------------------------------------
 // Edge Detection Shaders (First Pass)
 
-uniform vec4 i_resolution;
+layout (push_constant) uniform DrawInfo {
+    vec4 i_resolution;
+	int convert_colors;
+};
 #define SMAA_RT_METRICS vec4(i_resolution.z, i_resolution.w, i_resolution.x, i_resolution.y)
 #define SMAA_GLSL_4
 #define SMAA_FLIP_Y 0
@@ -109,7 +123,10 @@ const char* SMAA_PASS_1_VERT = R"(
 //-----------------------------------------------------------------------------
 // Blending Weight Calculation Shader (Second Pass)
 
-uniform vec4 i_resolution;
+layout (push_constant) uniform DrawInfo {
+    vec4 i_resolution;
+	int convert_colors;
+};
 #define SMAA_RT_METRICS vec4(i_resolution.z, i_resolution.w, i_resolution.x, i_resolution.y)
 #define SMAA_GLSL_4
 #define SMAA_FLIP_Y 0
@@ -138,7 +155,10 @@ const char* SMAA_PASS_1_FRAG = R"(
 //-----------------------------------------------------------------------------
 // Blending Weight Calculation Shader (Second Pass)
 
-uniform vec4 i_resolution;
+layout (push_constant) uniform DrawInfo {
+    vec4 i_resolution;
+	int convert_colors;
+};
 #define SMAA_RT_METRICS vec4(i_resolution.z, i_resolution.w, i_resolution.x, i_resolution.y)
 #define SMAA_GLSL_4
 #define SMAA_FLIP_Y 0
@@ -169,7 +189,10 @@ const char* SMAA_PASS_2_VERT = R"(
 //-----------------------------------------------------------------------------
 // Neighborhood Blending Shader (Third Pass)
 
-uniform vec4 i_resolution;
+layout (push_constant) uniform DrawInfo {
+    vec4 i_resolution;
+	int convert_colors;
+};
 #define SMAA_RT_METRICS vec4(i_resolution.z, i_resolution.w, i_resolution.x, i_resolution.y)
 #define SMAA_GLSL_4
 #define SMAA_FLIP_Y 0
@@ -195,8 +218,10 @@ const char* SMAA_PASS_2_FRAG = R"(
 //-----------------------------------------------------------------------------
 // Neighborhood Blending Shader (Third Pass)
 
-uniform vec4 i_resolution;
-uniform int convert_colors;
+layout (push_constant) uniform DrawInfo {
+    vec4 i_resolution;
+	int convert_colors;
+};
 #define SMAA_RT_METRICS vec4(i_resolution.z, i_resolution.w, i_resolution.x, i_resolution.y)
 #define SMAA_GLSL_4
 #define SMAA_FLIP_Y 0

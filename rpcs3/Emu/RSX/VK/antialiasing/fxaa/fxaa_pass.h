@@ -6,11 +6,11 @@ namespace vk
 {
 	class fxaa_pass : public antialiasing_filter
 	{
-	//struct uniform_locations
-	//{
-	//	GLuint i_resolution;
-	//	GLuint convert_colors;
-	//};
+	struct push_constant_uniform
+	{
+		std::array<float, 4> i_resolution{};
+		int convert_colors;
+	};
 	struct ScreenRectVertex
 	{
 		ScreenRectVertex() = default;

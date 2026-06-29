@@ -1125,8 +1125,7 @@ QString emu_settings::GetLocalizedSetting(const QString& original, emu_settings_
 		{
 		case output_scaling_mode::nearest: return tr("Nearest", "Output Scaling Mode");
 		case output_scaling_mode::bilinear: return tr("Bilinear", "Output Scaling Mode");
-		case output_scaling_mode::lanczos3: return tr("Lanczos", "Output Scaling Mode");
-		case output_scaling_mode::bicubic_rcas: return tr("Bicubic-RCAS", "Output Scaling Mode");
+		case output_scaling_mode::lanczos3_rcas: return tr("Lanczos-RCAS", "Output Scaling Mode");
 		case output_scaling_mode::fsr: return tr("FidelityFX Super Resolution 1", "Output Scaling Mode");
 		}
 		break;
