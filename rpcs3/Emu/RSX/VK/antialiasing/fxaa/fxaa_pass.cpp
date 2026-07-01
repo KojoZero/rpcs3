@@ -3,13 +3,20 @@
 namespace vk
 {
 	fxaa_pass::fxaa_pass() {
+		const auto pdev = vk::get_current_renderer();
 		m_vertices = {
 			ScreenRectVertex(-1.f, 1.f, 0.f, 1.f),  // Left,  Top
 			ScreenRectVertex(1.f, 1.f, 1.f, 1.f),   // Right, Top
 			ScreenRectVertex(-1.f, -1.f, 0.f, 0.f), // Left,  Bottom
 			ScreenRectVertex(1.f, -1.f, 1.f, 0.f),  // Right, Bottom
 		};
-		const auto pdev = vk::get_current_renderer();
+
+		// Create and Fill Vertex Buffer
+		m_vbo = std::make_unique<vk::buffer>(*pdev, sizeof(m_vertices), pdev->get_memory_mapping().host_visible_coherent, 0, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, 0, VMM_ALLOCATION_POOL_UNDEFINED);
+		void* data = m_vbo->map(0, sizeof(m_vertices));
+		memcpy(data, m_vertices.data(), sizeof(m_vertices));
+		m_vbo->unmap();
+
 		m_sampler = std::make_unique<vk::sampler>(*pdev,
 			VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
 			VK_FALSE, 0.f, 1.f, 0.f, 0.f, VK_FILTER_LINEAR, VK_FILTER_LINEAR, VK_SAMPLER_MIPMAP_MODE_NEAREST, VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK);
@@ -227,10 +234,30 @@ namespace vk
 
 
 		// Vulkan Single Pass
+		coordu viewport_region = {0, 0, src->width(), src->height()};
+		vk::begin_renderpass(cmd, m_texture_renderpass, m_intermediate_texture_fbo->value, viewport_region);
+		VkViewport viewport{};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = static_cast<float>(src->width());
+		viewport.height = static_cast<float>(src->height());
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(cmd, 0, 1, &viewport);
+
+
+		VkRect2D scissor{};
+		scissor.offset = {0, 0};
+		scissor.extent = {src->width(), src->height()};
+		vkCmdSetScissor(cmd, 0, 1, &scissor);
+
+		VkDeviceSize offset = 0;
 		m_program->bind_uniform({*m_intermediate_texture->get_view(rsx::default_remap_vector, VK_IMAGE_ASPECT_COLOR_BIT), *m_sampler}, 0, 0);
+		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_program->value());
+		vkCmdBindVertexBuffers(cmd, 0, 1, &m_vbo->value, &offset);
 		vkCmdPushConstants(cmd, m_program->layout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(push_constant_uniform), &uniforms);
 		vkCmdPushConstants(cmd, m_program->layout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(push_constant_uniform), sizeof(push_constant_uniform), &uniforms);
-
+		vk::end_renderpass(cmd);
 
 		return m_intermediate_texture.get();
 	}

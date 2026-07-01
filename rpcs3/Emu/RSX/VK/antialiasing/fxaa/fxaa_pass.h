@@ -44,6 +44,7 @@ namespace vk
 		std::unique_ptr<vk::sampler> m_sampler;
 		std::unique_ptr<vk::viewable_image> m_intermediate_texture;
 		std::unique_ptr<vk::framebuffer> m_intermediate_texture_fbo;
+		std::unique_ptr<vk::buffer> m_vbo;
 		vk::glsl::shader m_vert_shader;
 		vk::glsl::shader m_frag_shader;
 		std::unique_ptr<vk::glsl::program> m_program;
