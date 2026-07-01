@@ -401,9 +401,9 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 		const bool backbuffer_has_alpha = m_frame->has_alpha();
 
 
-		if (!m_antialiasing_filter || m_post_antialiasing != g_cfg.video.post_antialiasing)
+		if ((!m_antialiasing_filter && g_cfg.video.post_antialiasing.get() != post_antialiasing_mode::none) || m_post_antialiasing != g_cfg.video.post_antialiasing.get())
 		{
-			m_post_antialiasing = g_cfg.video.post_antialiasing;
+			m_post_antialiasing = g_cfg.video.post_antialiasing.get();
 
 			switch (m_post_antialiasing)
 			{
@@ -426,7 +426,7 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 			}
 		}
 
-		m_post_antialiasing = g_cfg.video.post_antialiasing;
+		m_post_antialiasing = g_cfg.video.post_antialiasing.get();
 		if (m_post_antialiasing == post_antialiasing_mode::none)
 		{
 			postAntialiasingEnabled = false;
@@ -436,23 +436,28 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 			postAntialiasingEnabled = true;
 		}
 
-		if (!m_upscaler || m_output_scaling != g_cfg.video.output_scaling)
+
+		if (!m_upscaler || m_output_scaling != g_cfg.video.output_scaling.get())
 		{
-			m_output_scaling = g_cfg.video.output_scaling;
+			m_output_scaling = g_cfg.video.output_scaling.get();
 
 			switch (m_output_scaling)
 			{
 			case output_scaling_mode::nearest:
+				printf("Output Scaling Mode: NEAREST SELECTED\n");
 				m_upscaler = std::make_unique<gl::nearest_upscale_pass>();
 				break;
 			case output_scaling_mode::fsr:
+				printf("Output Scaling Mode: FSR SELECTED\n");
 				m_upscaler = std::make_unique<gl::fsr_upscale_pass>();
 				break;
 			case output_scaling_mode::lanczos3_rcas:
+				printf("Output Scaling Mode: LANCZOS SELECTED\n");
 				m_upscaler = std::make_unique<gl::lanczos3_pass>();
 				break;
 			case output_scaling_mode::bilinear:
 			default:
+				printf("Output Scaling Mode: BILINEAR SELECTED\n");
 				m_upscaler = std::make_unique<gl::bilinear_upscale_pass>();
 				break;
 			}

@@ -17,37 +17,14 @@ namespace vk
 		m_vert_shader.compile();
 		m_frag_shader.create(::glsl::program_domain::glsl_fragment_program, FXAA_FRAG);
 		m_frag_shader.compile();
-		compileShaderProgram(m_vert_shader, m_frag_shader, m_program);
-		//glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &prev_vao);
-		//m_vao.create();
-		//m_vao.bind();
+		compileShaderProgram(m_vert_shader, m_frag_shader, m_program, false);
+		m_texture_renderpass = vk::get_renderpass(*pdev, vk::get_renderpass_key(VK_FORMAT_R16G16B16A16_SFLOAT));
 		//m_vbo.create(sizeof(ScreenRectVertex) * 4, m_vertices.data(), gl::buffer::memory_type::local, 0);
 		//m_vbo.bind();
-		//printf("Created VAO/VBO\n");
-		//glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenRectVertex), reinterpret_cast<void*>(offsetof(ScreenRectVertex, position)));
-		//glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenRectVertex), reinterpret_cast<void*>(offsetof(ScreenRectVertex, tex_coord)));
-		//glEnableVertexAttribArray(0);
-		//glEnableVertexAttribArray(1);
-		//printf("Set Vertex Attribs\n");
-		//m_vert_shader.create(::glsl::program_domain::glsl_vertex_program, FXAA_VERT);
-		//m_vert_shader.compile();
-		//m_frag_shader.create(::glsl::program_domain::glsl_fragment_program, FXAA_FRAG);
-		//m_frag_shader.compile();
-		//m_program.create();
-		//m_program.attach(m_vert_shader);
-		//m_program.attach(m_frag_shader);
-		//m_program.link();
-		//printf("Compiled Shader\n");
-		//m_sampler.create();
-		//m_sampler.apply_defaults(GL_LINEAR);
 		//m_fbo.create();
-		//printf("Created FBO/Sampler\n");
-		//allocateTextures(prev_src_region);
-		//printf("Allocated Textures\n");
-		//glBindVertexArray(prev_vao);
 	}
 
-	void fxaa_pass::compileShaderProgram(vk::glsl::shader vs, vk::glsl::shader fs, std::unique_ptr<vk::glsl::program>& shader_program)
+	void fxaa_pass::compileShaderProgram(vk::glsl::shader vs, vk::glsl::shader fs, std::unique_ptr<vk::glsl::program>& shader_program, bool enableBlend)
 	{
 		// Configuring Pipeline State
 		VkPipelineInputAssemblyStateCreateInfo ia{};
@@ -65,7 +42,7 @@ namespace vk
 		                           VK_COLOR_COMPONENT_G_BIT |
 		                           VK_COLOR_COMPONENT_B_BIT |
 		                           VK_COLOR_COMPONENT_A_BIT;
-		att_state.blendEnable = VK_FALSE;
+		att_state.blendEnable = enableBlend == true ? VK_TRUE : VK_FALSE;
 		att_state.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
 		att_state.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
 		att_state.colorBlendOp = VK_BLEND_OP_ADD;
@@ -186,15 +163,29 @@ namespace vk
 		//printf("Destroyed: FXAA PASS\n");
 	}
 
-	//void fxaa_pass::attachUniforms(GLuint shader_program_id) {
-	//	//uniform_locs.i_resolution = glGetUniformLocation(shader_program_id, "i_resolution");
-	//	//uniform_locs.convert_colors = glGetUniformLocation(shader_program_id, "convert_colors");
-	//}
-
-	void fxaa_pass::allocateTextures(areai internal_res)
+	void fxaa_pass::allocateTextures(const vk::command_buffer& cmd, areai internal_res)
 	{
-		//m_intermediate_texture.reset();
-		//m_intermediate_texture = std::make_unique<gl::texture>(GL_TEXTURE_2D, internal_res.width(), internal_res.height(), 1, 1, 1, GL_RGBA16F, RSX_FORMAT_CLASS_COLOR);
+		m_intermediate_texture.reset();
+		allocateTexture(cmd, internal_res.width(), internal_res.height(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, m_intermediate_texture);
+		allocateFBO(internal_res.width(), internal_res.height(), m_intermediate_texture, m_intermediate_texture_fbo);
+	}
+
+	void fxaa_pass::allocateTexture(const vk::command_buffer& cmd, int width, int height, VkImageLayout dst_layout, std::unique_ptr<vk::viewable_image>& texture)
+	{
+		const auto pdev = vk::get_current_renderer();
+		VkFlags usage_flags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+		texture = std::make_unique<vk::viewable_image>(*pdev, pdev->get_memory_mapping().device_local, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			VK_IMAGE_TYPE_2D, VK_FORMAT_R16G16B16A16_SFLOAT, width, height, 1, 1, 1, VK_SAMPLE_COUNT_1_BIT, //  (image Type (dimensions), texture format, width, height, depth, mips, layers, samples)
+			VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_TILING_OPTIMAL, usage_flags,
+			VK_IMAGE_CREATE_ALLOW_NULL_RPCS3, VMM_ALLOCATION_POOL_SWAPCHAIN, RSX_FORMAT_CLASS_COLOR);
+		texture->change_layout(cmd, dst_layout);
+		texture->get_view(rsx::default_remap_vector, VK_IMAGE_ASPECT_COLOR_BIT);
+	}
+
+	void fxaa_pass::allocateFBO(int width, int height, std::unique_ptr<vk::viewable_image>& texture, std::unique_ptr<vk::framebuffer>& framebuffer)
+	{
+		const auto pdev = vk::get_current_renderer();
+		framebuffer = std::make_unique<vk::framebuffer>(*pdev, m_texture_renderpass, width, height, texture->get_view(rsx::default_remap_vector, VK_IMAGE_ASPECT_COLOR_BIT));
 	}
 
 	vk::viewable_image* fxaa_pass::antialias_output(
@@ -203,11 +194,13 @@ namespace vk
 		VkImage present_surface,             // Present target. May be VK_NULL_HANDLE for some passes
 		VkImageLayout present_surface_layout // Present surface layout, or VK_IMAGE_LAYOUT_UNDEFINED if no present target is provided
 	) {
-		//if (src_region.width() != prev_src_region.width() || src_region.height() != prev_src_region.height())
-		//{
-		//	allocateTextures(src_region);
-		//	prev_src_region = src_region;
-		//}
+		// Add texture init for case where src_region is 0,0,1,1 or set prev_src_region to some impossible number
+		src_region = {0, 0, src->width(), src->height()};
+		if (src_region.width() != prev_src_region.width() || src_region.height() != prev_src_region.height())
+		{
+			allocateTextures(cmd, src_region);
+			prev_src_region = src_region;
+		}
 
 		//// Bind Framebuffer and VAO
 		//glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &prev_vao);
@@ -229,6 +222,15 @@ namespace vk
 		//glUniform1i(uniform_locs.convert_colors, 0);
 		//glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		//glBindVertexArray(prev_vao);
+
+
+
+
+		// Vulkan Single Pass
+		m_program->bind_uniform({*m_intermediate_texture->get_view(rsx::default_remap_vector, VK_IMAGE_ASPECT_COLOR_BIT), *m_sampler}, 0, 0);
+		vkCmdPushConstants(cmd, m_program->layout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(push_constant_uniform), &uniforms);
+		vkCmdPushConstants(cmd, m_program->layout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(push_constant_uniform), sizeof(push_constant_uniform), &uniforms);
+
 
 		return m_intermediate_texture.get();
 	}

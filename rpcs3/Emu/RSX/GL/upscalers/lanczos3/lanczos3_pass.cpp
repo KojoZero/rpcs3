@@ -135,7 +135,7 @@ namespace gl
 			prev_dst_region = dst_region;
 		}
 
-		float cas_attenuation = 2.f - (g_cfg.video.rcas_sharpening_intensity / 50.f);
+		float cas_attenuation = 2.f - (g_cfg.video.rcas_sharpening_intensity.get() / 50.f);
 
 		// Bind Framebuffer and VAO
 		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &prev_vao);

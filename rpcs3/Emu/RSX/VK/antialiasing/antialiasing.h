@@ -5,6 +5,7 @@
 #include "../vkutils/image.h"
 #include "../vkutils/sampler.h"
 #include "../vkutils/device.h"
+#include "../vkutils/framebuffer_object.hpp"
 #include "../VKHelpers.h"
 #include "../VKProgramPipeline.h"
 #include "../VKPipelineCompiler.h"

@@ -37,23 +37,24 @@ namespace vk
 			) = 0;
 
 	private:
-		//gl::vao m_vao;
 		//gl::buffer m_vbo;
 		//gl::fbo m_fbo;
+		push_constant_uniform uniforms;
+		VkRenderPass m_texture_renderpass;
 		std::unique_ptr<vk::sampler> m_sampler;
 		std::unique_ptr<vk::viewable_image> m_intermediate_texture;
+		std::unique_ptr<vk::framebuffer> m_intermediate_texture_fbo;
 		vk::glsl::shader m_vert_shader;
 		vk::glsl::shader m_frag_shader;
 		std::unique_ptr<vk::glsl::program> m_program;
-		//gl::glsl::program m_program;
-		//areai prev_src_region = {0, 0, 1, 1};
-		//uniform_locations uniform_locs;
-		//void attachUniforms(GLuint shader_program_id);
-		//	GLint prev_vao;
-		void allocateTextures(areai internal_res);
-		void compileShaderProgram(vk::glsl::shader vs, vk::glsl::shader fs, std::unique_ptr<vk::glsl::program>& shader_program);
+		areai src_region = {0, 0, 1, 1};
+		areai prev_src_region = {0, 0, 1, 1};
+		bool textureInit;
+		void allocateTextures(const vk::command_buffer& cmd, areai internal_res);
+		void allocateTexture(const vk::command_buffer& cmd, int width, int height, VkImageLayout dst_layout, std::unique_ptr<vk::viewable_image>& texture);
+		void allocateFBO(int width, int height, std::unique_ptr<vk::viewable_image>& texture, std::unique_ptr<vk::framebuffer>& framebuffer);
+		void compileShaderProgram(vk::glsl::shader vs, vk::glsl::shader fs, std::unique_ptr<vk::glsl::program>& shader_program, bool enableBlend);
 		std::array<ScreenRectVertex, 4> m_vertices;
-
 	
 	};
 } // namespace gl
