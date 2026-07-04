@@ -7,7 +7,7 @@ namespace glsl
 		glsl_vertex_program = 0,
 		glsl_fragment_program = 1,
 		glsl_compute_program = 2,
-
+		glsl_vertex_fragment_program = 3,
 		// Meta
 		glsl_invalid_program = 7
 	};

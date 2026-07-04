@@ -1,6 +1,6 @@
 #pragma once
 
-const char* CONVERT_COLORS_VERT = R"(
+const char* VK_CONVERT_COLORS_VERT = R"(
 #version 430 core
 layout(location = 0) in vec2 vert_position;
 layout(location = 1) in vec2 vert_tex_coord;
@@ -16,7 +16,7 @@ void main() {
 }
 )";
 
-const char* CONVERT_COLORS_FRAG = R"(
+const char* VK_CONVERT_COLORS_FRAG = R"(
 #version 430 core
 
 layout(location = 0) in vec2 frag_tex_coord;
@@ -51,7 +51,7 @@ void main() {
 
 
 
-const char* SMAA_PASS_0_VERT = R"(
+const char* VK_SMAA_PASS_0_VERT = R"(
 #version 430
 // SPDX-License-Identifier: Unlicense
 //-----------------------------------------------------------------------------
@@ -83,7 +83,7 @@ void main() {
 }
 )";
 
-const char* SMAA_PASS_0_FRAG = R"(
+const char* VK_SMAA_PASS_0_FRAG = R"(
 #version 430
 // SPDX-License-Identifier: Unlicense
 //-----------------------------------------------------------------------------
@@ -117,7 +117,7 @@ void main() {
 
 )";
 
-const char* SMAA_PASS_1_VERT = R"(
+const char* VK_SMAA_PASS_1_VERT = R"(
 #version 430
 // SPDX-License-Identifier: Unlicense
 //-----------------------------------------------------------------------------
@@ -149,7 +149,7 @@ void main() {
 }
 )";
 
-const char* SMAA_PASS_1_FRAG = R"(
+const char* VK_SMAA_PASS_1_FRAG = R"(
 #version 430
 // SPDX-License-Identifier: Unlicense
 //-----------------------------------------------------------------------------
@@ -183,7 +183,7 @@ void main() {
 
 )";
 
-const char* SMAA_PASS_2_VERT = R"(
+const char* VK_SMAA_PASS_2_VERT = R"(
 #version 430
 // SPDX-License-Identifier: Unlicense
 //-----------------------------------------------------------------------------
@@ -212,7 +212,7 @@ void main() {
 }
 )";
 
-const char* SMAA_PASS_2_FRAG = R"(
+const char* VK_SMAA_PASS_2_FRAG = R"(
 #version 430
 // SPDX-License-Identifier: Unlicense
 //-----------------------------------------------------------------------------
@@ -249,7 +249,7 @@ void main() {
 
 )";
 
-const char* SMAA_HLSL = R"(
+const char* VK_SMAA_HLSL = R"(
 /**
  * Copyright (C) 2013 Jorge Jimenez (jorge@iryoku.com)
  * Copyright (C) 2013 Jose I. Echevarria (joseignacioechevarria@gmail.com)

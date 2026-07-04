@@ -10,25 +10,23 @@ namespace vk
 			ScreenRectVertex(-1.f, -1.f, 0.f, 0.f), // Left,  Bottom
 			ScreenRectVertex(1.f, -1.f, 1.f, 0.f),  // Right, Bottom
 		};
-
+		
 		// Create and Fill Vertex Buffer
 		m_vbo = std::make_unique<vk::buffer>(*pdev, sizeof(m_vertices), pdev->get_memory_mapping().host_visible_coherent, 0, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, 0, VMM_ALLOCATION_POOL_UNDEFINED);
 		void* data = m_vbo->map(0, sizeof(m_vertices));
 		memcpy(data, m_vertices.data(), sizeof(m_vertices));
 		m_vbo->unmap();
-
+		printf("Created VBO\n");
 		m_sampler = std::make_unique<vk::sampler>(*pdev,
 			VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
 			VK_FALSE, 0.f, 1.f, 0.f, 0.f, VK_FILTER_LINEAR, VK_FILTER_LINEAR, VK_SAMPLER_MIPMAP_MODE_NEAREST, VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK);
-		m_vert_shader.create(::glsl::program_domain::glsl_vertex_program, FXAA_VERT);
+		m_vert_shader.create(::glsl::program_domain::glsl_vertex_program, VK_FXAA_VERT);
 		m_vert_shader.compile();
-		m_frag_shader.create(::glsl::program_domain::glsl_fragment_program, FXAA_FRAG);
+		m_frag_shader.create(::glsl::program_domain::glsl_fragment_program, VK_FXAA_FRAG);
 		m_frag_shader.compile();
 		compileShaderProgram(m_vert_shader, m_frag_shader, m_program, false);
+		printf("Compiled Shaders\n");
 		m_texture_renderpass = vk::get_renderpass(*pdev, vk::get_renderpass_key(VK_FORMAT_R16G16B16A16_SFLOAT));
-		//m_vbo.create(sizeof(ScreenRectVertex) * 4, m_vertices.data(), gl::buffer::memory_type::local, 0);
-		//m_vbo.bind();
-		//m_fbo.create();
 	}
 
 	void fxaa_pass::compileShaderProgram(vk::glsl::shader vs, vk::glsl::shader fs, std::unique_ptr<vk::glsl::program>& shader_program, bool enableBlend)
@@ -123,19 +121,8 @@ namespace vk
 			.renderpass_key = create_info_renderpass_key
 		};
 
-		// Setup Inputs
-		std::vector<vk::glsl::program_input> vertex_inputs =
-		{
-			glsl::program_input::make(
-				::glsl::program_domain::glsl_vertex_program,
-				"vertex_push_constants",
-				glsl::program_input_type::input_type_push_constant,
-				0,
-				0,
-				glsl::push_constant_ref{.offset = 0, .size = sizeof(push_constant_uniform)})
-		};
 
-		std::vector<vk::glsl::program_input> fragment_inputs =
+		std::vector<vk::glsl::program_input> vertex_fragment_inputs =
 		{
 			glsl::program_input::make(
 				::glsl::program_domain::glsl_fragment_program,
@@ -144,17 +131,17 @@ namespace vk
 				0,
 				0),
 			glsl::program_input::make(
-				::glsl::program_domain::glsl_fragment_program,
-				"fragment_push_constants",
+				::glsl::program_domain::glsl_vertex_fragment_program,
+				"push_constants",
 				glsl::program_input_type::input_type_push_constant,
 				0,
 				0,
-				glsl::push_constant_ref{.offset = sizeof(push_constant_uniform), .size = sizeof(push_constant_uniform)})
+				glsl::push_constant_ref{.offset = 0, .size = sizeof(push_constant_uniform)})
 		};
 		
 
 		auto compiler = vk::get_pipe_compiler();
-		shader_program = compiler->compile(create_info_props, vs.get_handle(), fs.get_handle(), vk::pipe_compiler::COMPILE_INLINE, {}, vertex_inputs, fragment_inputs);
+		shader_program = compiler->compile(create_info_props, vs.get_handle(), fs.get_handle(), vk::pipe_compiler::COMPILE_INLINE, {}, vertex_fragment_inputs, {});
 	}
 
 	fxaa_pass::~fxaa_pass() {
@@ -174,7 +161,9 @@ namespace vk
 	{
 		m_intermediate_texture.reset();
 		allocateTexture(cmd, internal_res.width(), internal_res.height(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, m_intermediate_texture);
+		printf("Allocated Intermediate Texture\n");
 		allocateFBO(internal_res.width(), internal_res.height(), m_intermediate_texture, m_intermediate_texture_fbo);
+		printf("Allocated Intermediate Framebuffer\n");
 	}
 
 	void fxaa_pass::allocateTexture(const vk::command_buffer& cmd, int width, int height, VkImageLayout dst_layout, std::unique_ptr<vk::viewable_image>& texture)
@@ -195,70 +184,73 @@ namespace vk
 		framebuffer = std::make_unique<vk::framebuffer>(*pdev, m_texture_renderpass, width, height, texture->get_view(rsx::default_remap_vector, VK_IMAGE_ASPECT_COLOR_BIT));
 	}
 
+	void fxaa_pass::setViewportAndScissor(const vk::command_buffer& cmd, coordu region)
+	{
+		VkViewport viewport{};
+		viewport.x = region.x;
+		viewport.y = region.y;
+		viewport.width = static_cast<float>(region.width);
+		viewport.height = static_cast<float>(region.height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(cmd, 0, 1, &viewport);
+
+		VkRect2D scissor{};
+		scissor.offset = {static_cast<int>(region.x), static_cast<int>(region.y)};
+		scissor.extent = {static_cast<u32>(region.width), static_cast<u32>(region.height)};
+		vkCmdSetScissor(cmd, 0, 1, &scissor);
+	}
+	
 	vk::viewable_image* fxaa_pass::antialias_output(
 		const vk::command_buffer& cmd,       // CB
-		vk::viewable_image* src,             // Source input
-		VkImage present_surface,             // Present target. May be VK_NULL_HANDLE for some passes
-		VkImageLayout present_surface_layout // Present surface layout, or VK_IMAGE_LAYOUT_UNDEFINED if no present target is provided
-	) {
+		vk::viewable_image* src              // Source input
+		) {
 		// Add texture init for case where src_region is 0,0,1,1 or set prev_src_region to some impossible number
-		src_region = {0, 0, src->width(), src->height()};
+		src_region = {0, 0, static_cast<int>(src->width()), static_cast<int>(src->height())};
 		if (src_region.width() != prev_src_region.width() || src_region.height() != prev_src_region.height())
 		{
 			allocateTextures(cmd, src_region);
 			prev_src_region = src_region;
 		}
 
-		//// Bind Framebuffer and VAO
-		//glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &prev_vao);
-		//m_vao.bind();
-		//m_fbo.bind();
-
-		//// Start Antialiasing
-		//m_fbo.color = m_intermediate_texture->id();
-		//m_fbo.read_buffer(m_fbo.color);
-		//m_fbo.draw_buffer(m_fbo.color);
-		//glViewport(0, 0, src_region.width(), src_region.height());
 		//cmd->clear_color(color4f(0,0,0,1));
 		//glClear(GL_COLOR_BUFFER_BIT);
 		//saved_sampler_state saved(0, m_sampler);
 		//cmd->bind_texture(0, GL_TEXTURE_2D, src->id());
-		//cmd->use_program(m_program.id());
-		//attachUniforms(m_program.id());
-		//glUniform4f(uniform_locs.i_resolution, src_region.width(), src_region.height(), 1.0f / src_region.width(), 1.0f / src_region.height());
-		//glUniform1i(uniform_locs.convert_colors, 0);
-		//glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		//glBindVertexArray(prev_vao);
-
 
 
 
 		// Vulkan Single Pass
-		coordu viewport_region = {0, 0, src->width(), src->height()};
-		vk::begin_renderpass(cmd, m_texture_renderpass, m_intermediate_texture_fbo->value, viewport_region);
-		VkViewport viewport{};
-		viewport.x = 0.0f;
-		viewport.y = 0.0f;
-		viewport.width = static_cast<float>(src->width());
-		viewport.height = static_cast<float>(src->height());
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-		vkCmdSetViewport(cmd, 0, 1, &viewport);
-
-
-		VkRect2D scissor{};
-		scissor.offset = {0, 0};
-		scissor.extent = {src->width(), src->height()};
-		vkCmdSetScissor(cmd, 0, 1, &scissor);
-
 		VkDeviceSize offset = 0;
-		m_program->bind_uniform({*m_intermediate_texture->get_view(rsx::default_remap_vector, VK_IMAGE_ASPECT_COLOR_BIT), *m_sampler}, 0, 0);
-		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_program->value());
+		coordu viewport_region = {0, 0, src->width(), src->height()};
+		if (vk::is_renderpass_open(cmd))
+		{
+			vk::end_renderpass(cmd);
+		}
+		vk::begin_renderpass(cmd, m_texture_renderpass, m_intermediate_texture_fbo->value, viewport_region);
+		printf("Began Renderpass\n");
+		setViewportAndScissor(cmd, viewport_region);
+		// Binding From src
+		src->change_layout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		printf("Changed SRC layout \n");
+		m_program->bind_uniform({*src->get_view(rsx::default_remap_vector, VK_IMAGE_ASPECT_COLOR_BIT), *m_sampler}, 0, 0);
+		m_program->bind(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS);
+		printf("Bound Graphics Pipeline and Descriptor Sets\n");;
 		vkCmdBindVertexBuffers(cmd, 0, 1, &m_vbo->value, &offset);
-		vkCmdPushConstants(cmd, m_program->layout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(push_constant_uniform), &uniforms);
-		vkCmdPushConstants(cmd, m_program->layout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(push_constant_uniform), sizeof(push_constant_uniform), &uniforms);
+		printf("Bound Vertex Buffer\n");
+		uniforms.i_resolution = {static_cast<float>(src_region.width()), static_cast<float>(src_region.height()), 1.0f / src_region.width(), 1.0f / src_region.height()};
+		uniforms.convert_colors = 0;
+		vkCmdPushConstants(cmd, m_program->layout(), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(push_constant_uniform), &uniforms);
+		printf("Pushed Constants\n");
+		vkCmdDraw(cmd, 4, 1, 0, 0);
+		printf("Called Draw\n");
 		vk::end_renderpass(cmd);
-
+		printf("Ended Renderpass\n");
 		return m_intermediate_texture.get();
+
+		// Binding From intermediate texture
+		// m_intermediate_texture->change_layout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		// m_program->bind_uniform({*m_intermediate_texture->get_view(rsx::default_remap_vector, VK_IMAGE_ASPECT_COLOR_BIT), *m_sampler}, 0, 0);
 	}
 } // namespace gl
+

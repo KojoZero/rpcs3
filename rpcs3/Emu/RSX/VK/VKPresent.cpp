@@ -9,6 +9,11 @@
 #include "upscalers/bilinear_pass.hpp"
 #include "upscalers/fsr_pass.h"
 #include "upscalers/nearest_pass.hpp"
+
+#include "antialiasing/fxaa/fxaa_pass.h"
+//#include "antialiasing/smaa/smaa_pass.h"
+
+
 #include "util/asm.hpp"
 #include "util/video_provider.h"
 
@@ -536,6 +541,8 @@ void VKGSRender::flip(const rsx::display_flip_info_t& info)
 	// Scan memory for required data. This is done early to optimize waiting for the driver image acquire below.
 	vk::viewable_image* image_to_flip = nullptr;
 	vk::viewable_image* image_to_flip2 = nullptr;
+	vk::viewable_image* image_to_scale = nullptr;
+	vk::viewable_image* image_to_scale2 = nullptr;
 
 	if (info.buffer < display_buffers_count && buffer_width && buffer_height)
 	{
@@ -779,40 +786,40 @@ void VKGSRender::flip(const rsx::display_flip_info_t& info)
 		target_layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 	}
 
-	//if (!m_antialiasing_filter || m_post_antialiasing != g_cfg.video.post_antialiasing)
-	//{
-	//	m_post_antialiasing = g_cfg.video.post_antialiasing;
+	if (!m_antialiasing_filter || m_post_antialiasing != g_cfg.video.post_antialiasing)
+	{
+		m_post_antialiasing = g_cfg.video.post_antialiasing;
 
-	//	switch (m_post_antialiasing)
-	//	{
-	//	case post_antialiasing_mode::fxaa:
-	//		printf("Post Antialiasing Mode: FXAA SELECTED\n");
-	//		m_antialiasing_filter = std::make_unique<vk::fxaa_pass>();
-	//		printf("Post Antialiasing Mode: FXAA CREATED\n");
-	//		postAntialiasingEnabled = true;
-	//		break;
-	//	case post_antialiasing_mode::smaa:
-	//		printf("Post Antialiasing Mode: SMAA SELECTED\n");
-	//		m_antialiasing_filter = std::make_unique<vk::smaa_pass>();
-	//		printf("Post Antialiasing Mode: SMAA CREATED\n");
-	//		postAntialiasingEnabled = true;
-	//		break;
-	//	default:
-	//		printf("Post Antialiasing Mode: NONE SELECTED\n");
-	//		postAntialiasingEnabled = false;
-	//		break;
-	//	}
-	//}
+		switch (m_post_antialiasing)
+		{
+		case post_antialiasing_mode::fxaa:
+			printf("Post Antialiasing Mode: FXAA SELECTED\n");
+			m_antialiasing_filter = std::make_unique<vk::fxaa_pass>();
+			printf("Post Antialiasing Mode: FXAA CREATED\n");
+			postAntialiasingEnabled = true;
+			break;
+		//case post_antialiasing_mode::smaa:
+		//	printf("Post Antialiasing Mode: SMAA SELECTED\n");
+		//	m_antialiasing_filter = std::make_unique<vk::smaa_pass>();
+		//	printf("Post Antialiasing Mode: SMAA CREATED\n");
+		//	postAntialiasingEnabled = true;
+		//	break;
+		default:
+			// printf("Post Antialiasing Mode: NONE SELECTED\n");
+			postAntialiasingEnabled = false;
+			break;
+		}
+	}
 
-	//m_post_antialiasing = g_cfg.video.post_antialiasing;
-	//if (m_post_antialiasing == post_antialiasing_mode::none)
-	//{
-	//	postAntialiasingEnabled = false;
-	//}
-	//else
-	//{
-	//	postAntialiasingEnabled = true;
-	//}
+	m_post_antialiasing = g_cfg.video.post_antialiasing;
+	if (m_post_antialiasing == post_antialiasing_mode::none)
+	{
+		postAntialiasingEnabled = false;
+	}
+	else
+	{
+		postAntialiasingEnabled = true;
+	}
 
 
 	const output_scaling_mode output_scaling = g_cfg.video.output_scaling.get();
@@ -863,7 +870,15 @@ void VKGSRender::flip(const rsx::display_flip_info_t& info)
 				for (unsigned i = 0; i < calibration_src.size(); ++i)
 				{
 					const rsx::flags32_t mode = (i == 0) ? UPSCALE_LEFT_VIEW : UPSCALE_RIGHT_VIEW;
-					calibration_src[i] = m_upscaler->scale_output(*m_current_command_buffer, image_to_flip, VK_NULL_HANDLE, VK_IMAGE_LAYOUT_UNDEFINED, request, mode);
+					if (postAntialiasingEnabled)
+					{
+						image_to_scale = m_antialiasing_filter->antialias_output(*m_current_command_buffer, image_to_flip);
+					}
+					else
+					{
+						image_to_scale = image_to_flip;
+					}
+					calibration_src[i] = m_upscaler->scale_output(*m_current_command_buffer, image_to_scale, VK_NULL_HANDLE, VK_IMAGE_LAYOUT_UNDEFINED, request, mode);
 				}
 			}
 
@@ -899,8 +914,15 @@ void VKGSRender::flip(const rsx::display_flip_info_t& info)
 				vk::change_image_layout(*m_current_command_buffer, target_image, target_layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresource_range);
 				target_layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 			}
-
-			m_upscaler->scale_output(*m_current_command_buffer, image_to_flip, target_image, target_layout, rgn, UPSCALE_AND_COMMIT | UPSCALE_DEFAULT_VIEW);
+			if (postAntialiasingEnabled)
+			{
+				image_to_scale = m_antialiasing_filter->antialias_output(*m_current_command_buffer, image_to_flip);
+			}
+			else
+			{
+				image_to_scale = image_to_flip;
+			}
+			m_upscaler->scale_output(*m_current_command_buffer, image_to_scale, target_image, target_layout, rgn, UPSCALE_AND_COMMIT | UPSCALE_DEFAULT_VIEW);
 		}
 	}
 

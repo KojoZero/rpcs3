@@ -1,6 +1,6 @@
 #pragma once
 
-const char* FXAA_VERT = R"(
+const char* VK_FXAA_VERT = R"(
 #version 430
 layout(location = 0) in vec2 vert_position;
 layout(location = 1) in vec2 vert_tex_coord;
@@ -17,7 +17,7 @@ void main()
 }
 )";
 
-const char* FXAA_FRAG = R"(
+const char* VK_FXAA_FRAG = R"(
 /**
  * @license
  * Copyright (c) 2011 NVIDIA Corporation. All rights reserved.

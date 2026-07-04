@@ -42,6 +42,25 @@ namespace vk
 			CHECK_RESULT(vkCreateFramebuffer(dev, &info, nullptr, &value));
 		}
 
+		framebuffer(VkDevice dev, VkRenderPass pass, u32 width, u32 height, vk::image_view* attachment)
+			: m_device(dev)
+		{
+			std::vector<VkImageView> image_view_array = {attachment->value};
+			info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			info.width = width;
+			info.height = height;
+			info.attachmentCount = static_cast<u32>(image_view_array.size());
+			info.pAttachments = image_view_array.data();
+			info.renderPass = pass;
+			info.layers = 1;
+
+			
+			m_width = width;
+			m_height = height;
+
+			CHECK_RESULT(vkCreateFramebuffer(dev, &info, nullptr, &value));
+		}
+
 		~framebuffer()
 		{
 			vkDestroyFramebuffer(m_device, value, nullptr);

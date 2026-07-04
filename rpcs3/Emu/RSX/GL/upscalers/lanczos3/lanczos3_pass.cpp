@@ -199,7 +199,7 @@ namespace gl
 			areai input_region = {0, 0, dst_region.width(), dst_region.height()};
 			m_flip_fbo.recreate();
 			m_flip_fbo.bind();
-			m_flip_fbo.color = m_intermediate_texture[1]->id();
+			m_flip_fbo.color = m_intermediate_texture[2]->id();
 			m_flip_fbo.read_buffer(m_flip_fbo.color);
 			m_flip_fbo.draw_buffer(m_flip_fbo.color);
 

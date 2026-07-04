@@ -31,14 +31,10 @@ namespace vk
 
 		vk::viewable_image* antialias_output(
 			const vk::command_buffer& cmd,       // CB
-			vk::viewable_image* src,             // Source input
-			VkImage present_surface,             // Present target. May be VK_NULL_HANDLE for some passes
-			VkImageLayout present_surface_layout // Present surface layout, or VK_IMAGE_LAYOUT_UNDEFINED if no present target is provided
-			) = 0;
+			vk::viewable_image* src              // Source input
+			) override;
 
 	private:
-		//gl::buffer m_vbo;
-		//gl::fbo m_fbo;
 		push_constant_uniform uniforms;
 		VkRenderPass m_texture_renderpass;
 		std::unique_ptr<vk::sampler> m_sampler;
@@ -47,6 +43,7 @@ namespace vk
 		std::unique_ptr<vk::buffer> m_vbo;
 		vk::glsl::shader m_vert_shader;
 		vk::glsl::shader m_frag_shader;
+
 		std::unique_ptr<vk::glsl::program> m_program;
 		areai src_region = {0, 0, 1, 1};
 		areai prev_src_region = {0, 0, 1, 1};
@@ -55,6 +52,7 @@ namespace vk
 		void allocateTexture(const vk::command_buffer& cmd, int width, int height, VkImageLayout dst_layout, std::unique_ptr<vk::viewable_image>& texture);
 		void allocateFBO(int width, int height, std::unique_ptr<vk::viewable_image>& texture, std::unique_ptr<vk::framebuffer>& framebuffer);
 		void compileShaderProgram(vk::glsl::shader vs, vk::glsl::shader fs, std::unique_ptr<vk::glsl::program>& shader_program, bool enableBlend);
+		void setViewportAndScissor(const vk::command_buffer& cmd, coordu region);
 		std::array<ScreenRectVertex, 4> m_vertices;
 	
 	};

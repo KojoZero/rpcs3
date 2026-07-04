@@ -75,6 +75,8 @@ namespace vk
 				return VK_SHADER_STAGE_FRAGMENT_BIT;
 			case glsl_compute_program:
 				return VK_SHADER_STAGE_COMPUTE_BIT;
+			case glsl_vertex_fragment_program:
+				return VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 			default:
 				fmt::throw_exception("Unexpected domain %d", static_cast<int>(domain));
 			}
