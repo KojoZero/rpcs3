@@ -1,5 +1,7 @@
 #include "lanczos3_pass.h"
 #include "lanczos3_shader.h"
+// FSR RCAS
+#include "../shared_shaders/shared_shaders.h"
 
 namespace gl
 {

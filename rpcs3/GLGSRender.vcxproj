@@ -94,6 +94,9 @@
     <ClInclude Include="Emu\RSX\GL\upscalers\lanczos3\lanczos3_pass.h" />
     <ClInclude Include="Emu\RSX\GL\upscalers\lanczos3\lanczos3_shader.h" />
     <ClInclude Include="Emu\RSX\GL\upscalers\nearest_pass.hpp" />
+    <ClInclude Include="Emu\RSX\GL\upscalers\nnedi3\nnedi3_pass.h" />
+    <ClInclude Include="Emu\RSX\GL\upscalers\nnedi3\nnedi3_shader.h" />
+    <ClInclude Include="Emu\RSX\GL\upscalers\shared_shaders\shared_shaders.h" />
     <ClInclude Include="Emu\RSX\GL\upscalers\static_pass.hpp" />
     <ClInclude Include="Emu\RSX\GL\upscalers\upscaling.h" />
   </ItemGroup>
@@ -129,6 +132,7 @@
     <ClCompile Include="Emu\RSX\GL\GLTextureCache.cpp" />
     <ClCompile Include="Emu\RSX\GL\upscalers\fsr1\fsr_pass.cpp" />
     <ClCompile Include="Emu\RSX\GL\upscalers\lanczos3\lanczos3_pass.cpp" />
+    <ClCompile Include="Emu\RSX\GL\upscalers\nnedi3\nnedi3_pass.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

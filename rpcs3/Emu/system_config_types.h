@@ -347,6 +347,7 @@ enum class output_scaling_mode
 	nearest,
 	bilinear,
 	lanczos3_rcas,
+	nnedi3_rcas,
 	fsr
 };
 

@@ -5,6 +5,7 @@
 #include "upscalers/fsr_pass.h"
 #include "upscalers/nearest_pass.hpp"
 #include "upscalers/lanczos3/lanczos3_pass.h"
+#include "upscalers/nnedi3/nnedi3_pass.h"
 
 #include "antialiasing/fxaa/fxaa_pass.h"
 #include "antialiasing/smaa/smaa_pass.h"
@@ -455,6 +456,10 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 				printf("Output Scaling Mode: LANCZOS SELECTED\n");
 				m_upscaler = std::make_unique<gl::lanczos3_pass>();
 				break;
+			case output_scaling_mode::nnedi3_rcas:
+				printf("Output Scaling Mode: NNEDI3 SELECTED\n");
+				m_upscaler = std::make_unique<gl::nnedi3_pass>();
+				break;
 			case output_scaling_mode::bilinear:
 			default:
 				printf("Output Scaling Mode: BILINEAR SELECTED\n");
@@ -494,7 +499,7 @@ void GLGSRender::flip(const rsx::display_flip_info_t& info)
 
 			rsx::simple_array<gl::texture*> images{image_to_scale, image_to_scale2};
 
-			if ((m_output_scaling == output_scaling_mode::fsr || m_output_scaling == output_scaling_mode::lanczos3_rcas) && !avconfig.stereo_enabled) // 3D will be implemented later
+			if ((m_output_scaling == output_scaling_mode::fsr || m_output_scaling == output_scaling_mode::lanczos3_rcas || m_output_scaling == output_scaling_mode::nnedi3_rcas) && !avconfig.stereo_enabled) // 3D will be implemented later
 			{
 				for (unsigned i = 0; i < 2 && images[i]; ++i)
 				{

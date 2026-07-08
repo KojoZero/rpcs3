@@ -58,6 +58,9 @@
     <ClCompile Include="Emu\RSX\GL\upscalers\lanczos3\lanczos3_pass.cpp">
       <Filter>upscalers\lanczos3</Filter>
     </ClCompile>
+    <ClCompile Include="Emu\RSX\GL\upscalers\nnedi3\nnedi3_pass.cpp">
+      <Filter>upscalers\nnedi3</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Emu\RSX\GL\GLTexture.h" />
@@ -161,6 +164,15 @@
     <ClInclude Include="Emu\RSX\GL\upscalers\lanczos3\lanczos3_pass.h">
       <Filter>upscalers\lanczos3</Filter>
     </ClInclude>
+    <ClInclude Include="Emu\RSX\GL\upscalers\shared_shaders\shared_shaders.h">
+      <Filter>upscalers\shared_shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Emu\RSX\GL\upscalers\nnedi3\nnedi3_pass.h">
+      <Filter>upscalers\nnedi3</Filter>
+    </ClInclude>
+    <ClInclude Include="Emu\RSX\GL\upscalers\nnedi3\nnedi3_shader.h">
+      <Filter>upscalers\nnedi3</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="glutils">
@@ -186,6 +198,12 @@
     </Filter>
     <Filter Include="upscalers\lanczos3">
       <UniqueIdentifier>{5e0a6c14-67f5-4a09-ad69-d7b47f7901cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="upscalers\shared_shaders">
+      <UniqueIdentifier>{eec27d0f-f2c3-40f7-9b70-8b5d0f6a1e5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="upscalers\nnedi3">
+      <UniqueIdentifier>{bea326ba-4386-4182-bf81-3e6c7a22d697}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

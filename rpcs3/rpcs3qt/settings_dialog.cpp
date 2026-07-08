@@ -874,7 +874,9 @@ settings_dialog::settings_dialog(std::shared_ptr<gui_settings> gui_settings, std
 	const auto apply_fsr_specific_options = [this]()
 	{
 		const auto [text, value] = get_data(ui->outputScalingMode, ui->outputScalingMode->currentIndex());
-		const bool fsr_rcas_selected = static_cast<output_scaling_mode>(value) == output_scaling_mode::fsr || static_cast<output_scaling_mode>(value) == output_scaling_mode::lanczos3_rcas;
+		const bool fsr_rcas_selected = static_cast<output_scaling_mode>(value) == output_scaling_mode::fsr ||
+			static_cast<output_scaling_mode>(value) == output_scaling_mode::lanczos3_rcas ||
+			static_cast<output_scaling_mode>(value) == output_scaling_mode::nnedi3_rcas;
 		ui->fsrSharpeningStrength->setEnabled(fsr_rcas_selected);
 		ui->fsrSharpeningStrengthReset->setEnabled(fsr_rcas_selected);
 	};

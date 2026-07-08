@@ -836,10 +836,14 @@ void VKGSRender::flip(const rsx::display_flip_info_t& info)
 		{
 			m_upscaler = std::make_unique<vk::fsr_upscale_pass>();
 		}
-		//else if (m_output_scaling == output_scaling_mode::lanczos3)
+		//else if (m_output_scaling == output_scaling_mode::lanczos3_rcas)
 		//{
 		//	m_upscaler = std::make_unique<vk::lanczos3_pass>();
 		//}
+		// else if (m_output_scaling == output_scaling_mode::nnedi3_rcas)
+		//{
+		//	m_upscaler = std::make_unique<vk::nnedi3_pass>();
+		// }
 		else
 		{
 			m_upscaler = std::make_unique<vk::bilinear_upscale_pass>();
