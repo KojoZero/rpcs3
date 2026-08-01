@@ -25,6 +25,13 @@ namespace gl
 		std::array<GLfloat, 2> position{};
 		std::array<GLfloat, 2> tex_coord{};
 	};
+	struct GLState
+	{
+		GLboolean blend_enabled;
+		GLboolean cull_enabled;
+		GLint src_rgb, dst_rgb, src_alpha, dst_alpha;
+		GLint eq_rgb, eq_alpha;
+	};
 	public:
 		fxaa_pass();
 		~fxaa_pass();
@@ -48,8 +55,11 @@ namespace gl
 		uniform_locations uniform_locs;
 		void attachUniforms(GLuint shader_program_id);
 		void allocateTextures(areai internal_res);
+		void saveGLState();
+		void restoreGLState();
 		std::array<ScreenRectVertex, 4> m_vertices;
 
 		GLint prev_vao;
+		GLState m_prevGLState;
 	};
 } // namespace gl

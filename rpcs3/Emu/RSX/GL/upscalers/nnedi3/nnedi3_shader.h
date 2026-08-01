@@ -253,6 +253,22 @@ layout(binding = 0) uniform sampler2D color_texture;
 uniform vec4 i_resolution;
 uniform vec4 o_resolution;
 
+#define LINEAR_GAMMA 0.0
+#define InputGamma   2.2
+#define OutputGamma  2.2
+#define ANTI_RINGING 0.0
+
+#define GAMMA_IN(color)     pow(color, vec3(InputGamma, InputGamma, InputGamma))
+
+// Classic Mitchell-Netravali bicubic parameters
+const float  B =  1.0/3.0; 
+const float  C =  1.0/3.0;
+
+const mat4 INV  = mat4(            (-B - 6.0*C)/6.0,         (3.0*B + 12.0*C)/6.0,     (-3.0*B - 6.0*C)/6.0,             B/6.0,
+                                        (12.0 - 9.0*B - 6.0*C)/6.0, (-18.0 + 12.0*B + 6.0*C)/6.0,                      0.0, (6.0 - 2.0*B)/6.0,
+                                       -(12.0 - 9.0*B - 6.0*C)/6.0, (18.0 - 15.0*B - 12.0*C)/6.0,      (3.0*B + 6.0*C)/6.0,             B/6.0,
+                                                   (B + 6.0*C)/6.0,                           -C,                      0.0,               0.0);
+
 void main()
 {
     vec2 fp = fract(frag_tex_coord*i_resolution.xy);
@@ -320,6 +336,22 @@ layout(location = 0) out vec4 fragColor;
 layout(binding = 0) uniform sampler2D color_texture;
 uniform vec4 i_resolution;
 uniform vec4 o_resolution;
+
+#define LINEAR_GAMMA 0.0
+#define InputGamma   2.2
+#define OutputGamma  2.2
+#define ANTI_RINGING 0.0
+
+#define GAMMA_OUT(color)    pow(color, vec3(1.0 / OutputGamma, 1.0 / OutputGamma, 1.0 / OutputGamma))
+
+// Classic Mitchell-Netravali bicubic parameters
+const float  B =  1.0/3.0; 
+const float  C =  1.0/3.0;
+
+const mat4 INV  = mat4(            (-B - 6.0*C)/6.0,         (3.0*B + 12.0*C)/6.0,     (-3.0*B - 6.0*C)/6.0,             B/6.0,
+                                        (12.0 - 9.0*B - 6.0*C)/6.0, (-18.0 + 12.0*B + 6.0*C)/6.0,                      0.0, (6.0 - 2.0*B)/6.0,
+                                       -(12.0 - 9.0*B - 6.0*C)/6.0, (18.0 - 15.0*B - 12.0*C)/6.0,      (3.0*B + 6.0*C)/6.0,             B/6.0,
+                                                   (B + 6.0*C)/6.0,                           -C,                      0.0,               0.0);
 
 void main()
 {
@@ -410,6 +442,7 @@ layout(location = 0) out vec4 fragColor;
 layout(binding = 0) uniform sampler2D color_texture;
 uniform vec4 i_resolution;
 uniform vec4 o_resolution;
+#define mul(a, b) ((b) * (a))
 
 void main()
 {

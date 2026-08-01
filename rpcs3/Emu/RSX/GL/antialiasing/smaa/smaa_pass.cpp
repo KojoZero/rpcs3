@@ -158,6 +158,46 @@ namespace gl
 		shader_source.replace(pos, include_string.size(), include_content);
 	};
 
+	void smaa_pass::saveGLState() {
+		m_prevGLState.blend_enabled = glIsEnabledi(GL_BLEND, 0);
+		m_prevGLState.cull_enabled = glIsEnabled(GL_CULL_FACE);
+		glGetIntegeri_v(GL_BLEND_SRC_RGB, 0, &m_prevGLState.src_rgb);
+		glGetIntegeri_v(GL_BLEND_DST_RGB, 0, &m_prevGLState.dst_rgb);
+		glGetIntegeri_v(GL_BLEND_SRC_ALPHA, 0, &m_prevGLState.src_alpha);
+		glGetIntegeri_v(GL_BLEND_DST_ALPHA, 0, &m_prevGLState.dst_alpha);
+		glGetIntegeri_v(GL_BLEND_EQUATION_RGB, 0, &m_prevGLState.eq_rgb);
+		glGetIntegeri_v(GL_BLEND_EQUATION_ALPHA, 0, &m_prevGLState.eq_alpha);
+	}
+
+	void smaa_pass::restoreGLState()
+	{
+		glBlendFuncSeparatei(0, m_prevGLState.src_rgb, m_prevGLState.dst_rgb,
+			m_prevGLState.src_alpha, m_prevGLState.dst_alpha);
+		glBlendEquationSeparatei(0, m_prevGLState.eq_rgb, m_prevGLState.eq_alpha);
+		if (m_prevGLState.blend_enabled)
+		{
+			glEnablei(GL_BLEND, 0);
+		}
+		else
+		{
+			glDisablei(GL_BLEND, 0);
+		}
+		if (m_prevGLState.cull_enabled)
+		{
+			glEnable(GL_CULL_FACE);
+		}
+		else
+		{
+			glDisable(GL_CULL_FACE);
+		}
+	}
+	void smaa_pass::useNormalBlend()
+	{
+		glBlendFuncSeparatei(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,
+			GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		glBlendEquationSeparatei(0, GL_FUNC_ADD, GL_FUNC_ADD);
+	}
+
 	void smaa_pass::reset_sampler_states() {
 		for (auto& sampler_state : saved_sampler_states)
 		{
@@ -177,9 +217,9 @@ namespace gl
 		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &prev_vao);
 		m_vao.bind();
 		m_fbo.bind();
-
+		saveGLState();
 		cmd->disablei(GL_BLEND, 0);
-
+		cmd->disable(GL_CULL_FACE);
 		// Create Src Texture with stripped transparency
 		m_fbo.color = m_intermediate_texture[4]->id();
 		m_fbo.read_buffer(m_fbo.color);
@@ -248,6 +288,7 @@ namespace gl
 		reset_sampler_states();
 
 		cmd->enablei(GL_BLEND, 0);
+		useNormalBlend();
 
 		// Create Neighborhood Blending Texture
 		m_fbo.color = m_intermediate_texture[2]->id();
@@ -268,7 +309,8 @@ namespace gl
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 		reset_sampler_states();
 		glBindVertexArray(prev_vao);
-
+		
+		//restoreGLState();
 		return m_intermediate_texture[2].get();
 	}
 } // namespace gl

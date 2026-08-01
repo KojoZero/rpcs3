@@ -25,6 +25,13 @@ namespace gl
 			std::array<GLfloat, 2> position{};
 			std::array<GLfloat, 2> tex_coord{};
 		};
+		struct GLState
+		{
+			GLboolean blend_enabled;
+			GLboolean cull_enabled;
+			GLint src_rgb, dst_rgb, src_alpha, dst_alpha;
+			GLint eq_rgb, eq_alpha;
+		};
 
 	public:
 		smaa_pass();
@@ -54,11 +61,16 @@ namespace gl
 		void attachUniforms(GLuint shader_program_id);
 		void allocateTextures(areai internal_res);
 		void allocateLookupTextures();
+		// Set blend to standard alpha blending
+		void useNormalBlend();
+		void saveGLState();
+		void restoreGLState();
 		void replaceInclude(std::string& shader_source, std::string include_name,
 			std::string include_content);
 		std::array<ScreenRectVertex, 4> m_vertices;
 
 		GLint prev_vao;
-		GLboolean prev_blend_state;
+		GLState m_prevGLState;
+
 	};
 } // namespace gl

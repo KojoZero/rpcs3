@@ -28,7 +28,13 @@ namespace gl
 			std::array<GLfloat, 2> position{};
 			std::array<GLfloat, 2> tex_coord{};
 		};
-
+		struct GLState
+		{
+			GLboolean blend_enabled;
+			GLboolean cull_enabled;
+			GLint src_rgb, dst_rgb, src_alpha, dst_alpha;
+			GLint eq_rgb, eq_alpha;
+		};
 	public:
 		lanczos3_pass();
 		~lanczos3_pass();
@@ -58,10 +64,13 @@ namespace gl
 		void reset_sampler_states();
 		void attachUniforms(GLuint shader_program_id);
 		void allocateTextures(areai internal_res, areai screen_res);
+		void saveGLState();
+		void restoreGLState();
 		void replaceInclude(std::string& shader_source, std::string include_name,
 			std::string include_content);
 		std::array<ScreenRectVertex, 4> m_vertices;
 
 		GLint prev_vao;
+		GLState m_prevGLState;
 	};
 } // namespace gl

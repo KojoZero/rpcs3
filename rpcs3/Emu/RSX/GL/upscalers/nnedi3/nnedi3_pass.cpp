@@ -60,6 +60,7 @@ namespace gl
 			m_program[i].attach(m_vert_shader[i]);
 			m_program[i].attach(m_frag_shader[i]);
 			m_program[i].link();
+			printf("Compiled NNEDI3 shader %d\n", i);
 		}
 
 		printf("Compiled Shaders\n");
@@ -153,7 +154,40 @@ namespace gl
 			sampler_state.reset();
 		}
 	}
+	void nnedi3_pass::saveGLState()
+	{
+		m_prevGLState.blend_enabled = glIsEnabledi(GL_BLEND, 0);
+		m_prevGLState.cull_enabled = glIsEnabled(GL_CULL_FACE);
+		glGetIntegeri_v(GL_BLEND_SRC_RGB, 0, &m_prevGLState.src_rgb);
+		glGetIntegeri_v(GL_BLEND_DST_RGB, 0, &m_prevGLState.dst_rgb);
+		glGetIntegeri_v(GL_BLEND_SRC_ALPHA, 0, &m_prevGLState.src_alpha);
+		glGetIntegeri_v(GL_BLEND_DST_ALPHA, 0, &m_prevGLState.dst_alpha);
+		glGetIntegeri_v(GL_BLEND_EQUATION_RGB, 0, &m_prevGLState.eq_rgb);
+		glGetIntegeri_v(GL_BLEND_EQUATION_ALPHA, 0, &m_prevGLState.eq_alpha);
+	}
 
+	void nnedi3_pass::restoreGLState()
+	{
+		glBlendFuncSeparatei(0, m_prevGLState.src_rgb, m_prevGLState.dst_rgb,
+			m_prevGLState.src_alpha, m_prevGLState.dst_alpha);
+		glBlendEquationSeparatei(0, m_prevGLState.eq_rgb, m_prevGLState.eq_alpha);
+		if (m_prevGLState.blend_enabled)
+		{
+			glEnablei(GL_BLEND, 0);
+		}
+		else
+		{
+			glDisablei(GL_BLEND, 0);
+		}
+		if (m_prevGLState.cull_enabled)
+		{
+			glEnable(GL_CULL_FACE);
+		}
+		else
+		{
+			glDisable(GL_CULL_FACE);
+		}
+	}
 	gl::texture* nnedi3_pass::scale_output(
 		gl::command_context& cmd,
 		gl::texture* src,
@@ -183,7 +217,7 @@ namespace gl
 		Notes:
 			This implementation uses 16 neuron version on NNEDI3 to keep it as cheap as possible
 
-			NNEDI3 is run on the luma channel as it packs the most of the information relevant to perceptive quality
+			NNEDI3 is run on the luma channel as it packs the most of the information relevant to perceptual quality
 			at 1/3 the cost of doing this on rgb.
 
 			Bicubic (Mitchell) is run on the chroma channels as it's a lighter weight smoothing algorithm which hides
@@ -195,7 +229,9 @@ namespace gl
 		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &prev_vao);
 		m_vao.bind();
 		m_fbo.bind();
-
+		saveGLState();
+		cmd->disablei(GL_BLEND, 0);
+		cmd->disable(GL_CULL_FACE);
 		// RGB -> YUV
 		m_fbo.color = m_intermediate_texture[0]->id();
 		m_fbo.read_buffer(m_fbo.color);
@@ -203,7 +239,7 @@ namespace gl
 		glViewport(0, 0, src_region.width(), src_region.height());
 		cmd->clear_color(color4f(0, 0, 0, 1));
 		glClear(GL_COLOR_BUFFER_BIT);
-		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[1]);
+		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[0]);
 		cmd->bind_texture(0, GL_TEXTURE_2D, src->id());
 		cmd->use_program(m_program[0].id());
 		attachUniforms(m_program[0].id());
@@ -220,7 +256,7 @@ namespace gl
 		glViewport(0, 0, src_region.width(), src_region.height() * 2);
 		cmd->clear_color(color4f(0, 0, 0, 1));
 		glClear(GL_COLOR_BUFFER_BIT);
-		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[1]);
+		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[0]);
 		cmd->bind_texture(0, GL_TEXTURE_2D, m_intermediate_texture[0]->id());
 		cmd->use_program(m_program[1].id());
 		attachUniforms(m_program[1].id());
@@ -237,7 +273,7 @@ namespace gl
 		glViewport(0, 0, src_region.width() * 2, src_region.height() * 2);
 		cmd->clear_color(color4f(0, 0, 0, 1));
 		glClear(GL_COLOR_BUFFER_BIT);
-		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[1]);
+		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[0]);
 		cmd->bind_texture(0, GL_TEXTURE_2D, m_intermediate_texture[1]->id());
 		cmd->use_program(m_program[2].id());
 		attachUniforms(m_program[2].id());
@@ -271,8 +307,8 @@ namespace gl
 		glViewport(0, 0, src_region.width(), src_region.height() * 2);
 		cmd->clear_color(color4f(0, 0, 0, 1));
 		glClear(GL_COLOR_BUFFER_BIT);
-		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[1]);
-		cmd->bind_texture(0, GL_TEXTURE_2D, m_intermediate_texture[3]->id());
+		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[0]);
+		cmd->bind_texture(0, GL_TEXTURE_2D, m_intermediate_texture[0]->id());
 		cmd->use_program(m_program[4].id());
 		attachUniforms(m_program[4].id());
 		glUniform4f(uniform_locs.i_resolution, src_region.width(), src_region.height(), 1.0f / src_region.width(), 1.0f / src_region.height());
@@ -288,7 +324,7 @@ namespace gl
 		glViewport(0, 0, src_region.width() * 2, src_region.height() * 2);
 		cmd->clear_color(color4f(0, 0, 0, 1));
 		glClear(GL_COLOR_BUFFER_BIT);
-		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[1]);
+		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[0]);
 		cmd->bind_texture(0, GL_TEXTURE_2D, m_intermediate_texture[4]->id());
 		cmd->use_program(m_program[5].id());
 		attachUniforms(m_program[5].id());
@@ -305,8 +341,8 @@ namespace gl
 		glViewport(0, 0, src_region.width() * 2, src_region.height() * 2);
 		cmd->clear_color(color4f(0, 0, 0, 1));
 		glClear(GL_COLOR_BUFFER_BIT);
-		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[1]);
-		saved_sampler_states[1] = std::make_unique<saved_sampler_state>(0, m_sampler[1]);
+		saved_sampler_states[0] = std::make_unique<saved_sampler_state>(0, m_sampler[0]);
+		saved_sampler_states[1] = std::make_unique<saved_sampler_state>(1, m_sampler[0]);
 		cmd->bind_texture(0, GL_TEXTURE_2D, m_intermediate_texture[5]->id());
 		cmd->bind_texture(1, GL_TEXTURE_2D, m_intermediate_texture[3]->id());
 		cmd->use_program(m_program[6].id());
@@ -352,6 +388,7 @@ namespace gl
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 		reset_sampler_states();
 
+	/*	restoreGLState();*/
 		glBindVertexArray(prev_vao);
 
 		if (mode & UPSCALE_AND_COMMIT)
@@ -366,7 +403,7 @@ namespace gl
 			m_flip_fbo.blit(gl::screen, input_region, dst_region, gl::buffers::color, gl::filter::linear);
 			return 0;
 		}
-
+		
 		return m_intermediate_texture[8].get();
 	}
 } // namespace gl

@@ -122,6 +122,41 @@ namespace gl
 		}
 	}
 
+	void lanczos3_pass::saveGLState()
+	{
+		m_prevGLState.blend_enabled = glIsEnabledi(GL_BLEND, 0);
+		m_prevGLState.cull_enabled = glIsEnabled(GL_CULL_FACE);
+		glGetIntegeri_v(GL_BLEND_SRC_RGB, 0, &m_prevGLState.src_rgb);
+		glGetIntegeri_v(GL_BLEND_DST_RGB, 0, &m_prevGLState.dst_rgb);
+		glGetIntegeri_v(GL_BLEND_SRC_ALPHA, 0, &m_prevGLState.src_alpha);
+		glGetIntegeri_v(GL_BLEND_DST_ALPHA, 0, &m_prevGLState.dst_alpha);
+		glGetIntegeri_v(GL_BLEND_EQUATION_RGB, 0, &m_prevGLState.eq_rgb);
+		glGetIntegeri_v(GL_BLEND_EQUATION_ALPHA, 0, &m_prevGLState.eq_alpha);
+	}
+
+	void lanczos3_pass::restoreGLState()
+	{
+		glBlendFuncSeparatei(0, m_prevGLState.src_rgb, m_prevGLState.dst_rgb,
+			m_prevGLState.src_alpha, m_prevGLState.dst_alpha);
+		glBlendEquationSeparatei(0, m_prevGLState.eq_rgb, m_prevGLState.eq_alpha);
+		if (m_prevGLState.blend_enabled)
+		{
+			glEnablei(GL_BLEND, 0);
+		}
+		else
+		{
+			glDisablei(GL_BLEND, 0);
+		}
+		if (m_prevGLState.cull_enabled)
+		{
+			glEnable(GL_CULL_FACE);
+		}
+		else
+		{
+			glDisable(GL_CULL_FACE);
+		}
+	}
+
 	gl::texture* lanczos3_pass::scale_output(
 		gl::command_context& cmd,
 		gl::texture* src,
@@ -143,7 +178,9 @@ namespace gl
 		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &prev_vao);
 		m_vao.bind();
 		m_fbo.bind();
-
+		saveGLState();
+		cmd->disablei(GL_BLEND, 0);
+		cmd->disable(GL_CULL_FACE);
 		// Lanczos Y-Pass
 		m_fbo.color = m_intermediate_texture[0]->id();
 		m_fbo.read_buffer(m_fbo.color);
@@ -194,6 +231,7 @@ namespace gl
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 		reset_sampler_states();
 
+	/*	restoreGLState();*/
 		glBindVertexArray(prev_vao);
 
 		if (mode & UPSCALE_AND_COMMIT)
@@ -208,7 +246,6 @@ namespace gl
 			m_flip_fbo.blit(gl::screen, input_region, dst_region, gl::buffers::color, gl::filter::linear);
 			return 0;
 		}
-
 		return m_intermediate_texture[2].get();
 	}
 } // namespace gl

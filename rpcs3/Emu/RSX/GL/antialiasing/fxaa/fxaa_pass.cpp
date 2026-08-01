@@ -62,7 +62,40 @@ namespace gl
 		m_intermediate_texture.reset();
 		m_intermediate_texture = std::make_unique<gl::texture>(GL_TEXTURE_2D, internal_res.width(), internal_res.height(), 1, 1, 1, GL_RGBA16F, RSX_FORMAT_CLASS_COLOR);
 	}
+	void fxaa_pass::saveGLState()
+	{
+		m_prevGLState.blend_enabled = glIsEnabledi(GL_BLEND, 0);
+		m_prevGLState.cull_enabled = glIsEnabled(GL_CULL_FACE);
+		glGetIntegeri_v(GL_BLEND_SRC_RGB, 0, &m_prevGLState.src_rgb);
+		glGetIntegeri_v(GL_BLEND_DST_RGB, 0, &m_prevGLState.dst_rgb);
+		glGetIntegeri_v(GL_BLEND_SRC_ALPHA, 0, &m_prevGLState.src_alpha);
+		glGetIntegeri_v(GL_BLEND_DST_ALPHA, 0, &m_prevGLState.dst_alpha);
+		glGetIntegeri_v(GL_BLEND_EQUATION_RGB, 0, &m_prevGLState.eq_rgb);
+		glGetIntegeri_v(GL_BLEND_EQUATION_ALPHA, 0, &m_prevGLState.eq_alpha);
+	}
 
+	void fxaa_pass::restoreGLState()
+	{
+		glBlendFuncSeparatei(0, m_prevGLState.src_rgb, m_prevGLState.dst_rgb,
+			m_prevGLState.src_alpha, m_prevGLState.dst_alpha);
+		glBlendEquationSeparatei(0, m_prevGLState.eq_rgb, m_prevGLState.eq_alpha);
+		if (m_prevGLState.blend_enabled)
+		{
+			glEnablei(GL_BLEND, 0);
+		}
+		else
+		{
+			glDisablei(GL_BLEND, 0);
+		}
+		if (m_prevGLState.cull_enabled)
+		{
+			glEnable(GL_CULL_FACE);
+		}
+		else
+		{
+			glDisable(GL_CULL_FACE);
+		}
+	}
 	gl::texture* fxaa_pass::antialias_output(gl::command_context& cmd, gl::texture* src, const areai& src_region) {
 		if (src_region.width() != prev_src_region.width() || src_region.height() != prev_src_region.height())
 		{
@@ -74,13 +107,15 @@ namespace gl
 		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &prev_vao);
 		m_vao.bind();
 		m_fbo.bind();
-
+		saveGLState();
+		cmd->disablei(GL_BLEND, 0);
+		cmd->disable(GL_CULL_FACE);
 		// Start Antialiasing
 		m_fbo.color = m_intermediate_texture->id();
 		m_fbo.read_buffer(m_fbo.color);
 		m_fbo.draw_buffer(m_fbo.color);
 		glViewport(0, 0, src_region.width(), src_region.height());
-		cmd->clear_color(color4f(0,0,0,1));
+		cmd->clear_color(color4f(0, 0, 0, 1));
 		glClear(GL_COLOR_BUFFER_BIT);
 		saved_sampler_state saved(0, m_sampler);
 		cmd->bind_texture(0, GL_TEXTURE_2D, src->id());
@@ -91,6 +126,7 @@ namespace gl
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(prev_vao);
 
+		//restoreGLState();
 		return m_intermediate_texture.get();
 	}
 } // namespace gl
